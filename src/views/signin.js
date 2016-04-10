@@ -55,8 +55,8 @@ module.exports = React.createClass({
 					/>
 					<Button 
 					 	text={'LOGIN'} 
-					 	onPressColor={'#42A5F5'}
-					 	onRelaxColor={'#0288D1'} 
+					 	onPressColor={'#1565C0'}
+					 	onRelaxColor={'#1976D2'} 
 					 	onPress={this.onLoginPress}
 					/>
 					<Text 
@@ -190,7 +190,7 @@ var styles = StyleSheet.create({
 		flex: 1,
 		paddingLeft: 30,
 		paddingRight: 30,
-		backgroundColor: '#4FC3F7'
+		backgroundColor: '#2196F3'
 	},
 	header: {
 		flex: 1,

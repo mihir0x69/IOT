@@ -38,6 +38,6 @@ module.exports = React.createClass({
 const styles = StyleSheet.create({
 	toolbar:{
     	height: 55,
-    	backgroundColor: '#4FC3F7',
+    	backgroundColor: '#2196F3',
   	}	
 });

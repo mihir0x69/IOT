@@ -30,7 +30,7 @@ module.exports = React.createClass({
 			description: '',
 			errorTitle: '',
 			disableSubmit: false,
-			buttonColor: '#0288D1',
+			buttonColor: '#2196F3',
 			loader: BlankImage,
 			bookingResult: ''
 		}
@@ -58,7 +58,7 @@ module.exports = React.createClass({
     					<Text style={styles.errorMessage}>{this.state.errorTitle}</Text>
 						<TextInput 
 							placeholder={'Description'}
-							placeholderTextColor={'#B3E5FC'}
+							placeholderTextColor={'#BBDEFB'}
 							underlineColorAndroid={'#E1F5FE'}
 							style={styles.input}
 							autoCapitalize={'sentences'}
@@ -173,13 +173,13 @@ module.exports = React.createClass({
 				console.log("[NEW BOOKING API] Success: "+ JSON.stringify(result, null, 2));
 			},
 			function(error){
-				_this.setState({ disableSubmit: false, buttonColor: '#0288D1', loader: BlankImage });
+				_this.setState({ disableSubmit: false, buttonColor: '#2196F3', loader: BlankImage });
 				console.log("[NEW BOOKING API] Error: "+ JSON.stringify(error, null, 2));
 			}
 		);							
 	},
 	renderProgressBar: function(){
-		return <ProgressBarAndroid color={'#4FC3F7'} styleAttr="Horizontal" />
+		return <ProgressBarAndroid color={'#2196F3'} styleAttr="Horizontal" />
 	},
 	renderBlank: function(){
 		return <View></View>
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
 		paddingRight: 10,
 		paddingBottom: 10,
 		paddingLeft: 55,
-		backgroundColor: '#4FC3F7',
+		backgroundColor: '#2196F3',
 	},	
 	inputTitle: {
 		color: '#ffffff',
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
 		borderRadius: 2
 	},
 	blue: {
-		color: '#0288D1',
+		color: '#2196F3',
 	},
 	gray: {
 		color: '#5f5f5f',

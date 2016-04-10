@@ -35,6 +35,7 @@ var Room = require('../components/room');
 
 //get device dimensions
 const {height, width} = Dimensions.get('window');
+var timeout;
 
 module.exports = React.createClass({
 
@@ -44,13 +45,13 @@ module.exports = React.createClass({
 			dataSource: new ListView.DataSource({
           		rowHasChanged: (row1, row2) => row1 !== row2
         	}),
-			loaded: true,
+			loaded: false,
 			isReloadRequired: false,
 			isEnabled: false,
 			isRefreshing: false,
 			selectedDate: Moment(),
 			selectedInTime: roundToNextSlot(Moment()),
-			selectedOutTime: roundToNextSlot(Moment()).add(30, "minutes")
+			selectedOutTime: roundToNextSlot(Moment()).add(30, "minutes"),
 		}
 	},
 	componentWillMount: function(){
@@ -58,11 +59,12 @@ module.exports = React.createClass({
 	},
 	loadData: function(){
 		
+		clearTimeout(timeout);
 		var _this = this;
 		this.API();
 
 		//check if data is loaded
-		setTimeout(function(){
+		timeout = setTimeout(function(){
 			if(_this.isMounted()){
 				if(_this.state.loaded===false){
 					_this.setState({
@@ -80,7 +82,7 @@ module.exports = React.createClass({
 		var _bookToTime = parseFloat(Moment(this.state.selectedOutTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.m"));
 		var _bookDate = Moment(Moment(this.state.selectedDate).format("D-M-YYYY") + " " + Moment(this.state.selectedInTime, "H:m").format("H.m"), "D-M-YYYY H:m").subtract(Moment().utcOffset(), "minutes").format("D-M-YYYY");
 
-		this.setState({ rawData: [], isReloadRequired: false, loaded: false, isEnabled: false, isRefreshing: true });
+		this.setState({ isReloadRequired: false, loaded: false, isEnabled: false, isRefreshing: true });
 
 		Parse.Cloud.run('checkAvailibilityOfRooms', {
 			bookdate: _bookDate,
@@ -135,7 +137,7 @@ module.exports = React.createClass({
 	        					<View style={styles.leftSection}>
 	        						<TouchableHighlight 
 	        							onPress={this.onPressChangeDate.bind(this, { date: new Date(this.state.selectedDate.format("YYYY-MM-DD")), minDate: new Date() })}
-	        							underlayColor={'#3f9cc5'}
+	        							underlayColor={'#1E88E5'}
 	        						>
 		        						<View style={styles.dateWrapper}>
 		        							<View style={styles.date}>
@@ -160,7 +162,7 @@ module.exports = React.createClass({
     										<Text style={styles.dayText}>In-Out Time </Text>
     										<TouchableHighlight 
     											onPress={this.onPressHelp}
-    											underlayColor={'#3f9cc5'}
+    											underlayColor={'#1E88E5'}
     										>
     											<Text style={styles.helpText}>[?]</Text>
     										</TouchableHighlight>
@@ -168,7 +170,7 @@ module.exports = React.createClass({
 		        						<View style={styles.inOutTimeWrapper}>
 		        							<TouchableHighlight 
 		        								onPress={this.onPressChangeInOutTime.bind(this, "IN", {hour: this._parseHour(this.state.selectedInTime), minute: this._parseMinute(this.state.selectedInTime), is24Hour: true})}
-		        								underlayColor={'#3f9cc5'}
+		        								underlayColor={'#1E88E5'}
 		        							>
 		        								<Text style={styles.monthYearText}>
 		        									{this.state.selectedInTime.format("HH:mm")}
@@ -177,7 +179,7 @@ module.exports = React.createClass({
 		        							<Text style={styles.monthYearText}> - </Text>
 		        							<TouchableHighlight 
 		        								onPress={this.onPressChangeInOutTime.bind(this, "OUT", {hour: this._parseHour(this.state.selectedOutTime), minute: this._parseMinute(this.state.selectedOutTime), is24Hour: true})}
-		        								underlayColor={'#3f9cc5'}
+		        								underlayColor={'#1E88E5'}
 		        							>
 		        								<Text style={styles.monthYearText}>
 		        									{this.state.selectedOutTime.format("HH:mm")}
@@ -192,6 +194,7 @@ module.exports = React.createClass({
 									<RefreshControl 
 				                		refreshing={this.state.isRefreshing}
 				                		onRefresh={this.loadData}
+				                		colors={['#2196F3', '#E91E63', '#FBC02D', '#607D8B']}
 									/>
 				            	}
 		            			contentContainerStyle={styles.container}
@@ -222,9 +225,10 @@ module.exports = React.createClass({
 						dataSource={this.state.dataSource}
 						renderRow={this.renderRoom}
 						style={styles.listView}
+						initialListSize={7}
 					/>
 				</View>
-			);			
+			);
 		}
 		return(
 			<View style={[styles.container, {alignItems: 'center', justifyContent: 'center'}]}>
@@ -421,7 +425,7 @@ const styles = StyleSheet.create({
 	},
 	panel: {
 		padding: 10,
-		backgroundColor: '#4FC3F7',
+		backgroundColor: '#2196F3',
 		flexDirection: 'row'
 	},
 	leftSection: {
@@ -444,7 +448,7 @@ const styles = StyleSheet.create({
 	},
 	dateNumber: {
 		fontSize: 30,
-		color: '#4FC3F7'
+		color: '#2196F3'
 	},
 	stackItems: {
 		paddingLeft: 10,

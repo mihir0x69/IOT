@@ -8,6 +8,7 @@ var {
   	RefreshControl,
   	ScrollView,
   	StyleSheet,
+  	Dimensions,
   	ListView,
   	Image,
   	Text,
@@ -24,6 +25,8 @@ var LoadingView = require('../components/loadingview');
 var ReloadView = require('../components/reloadview');
 var MeetingItem = require('../components/meetingitem');
 
+var timeout;
+
 module.exports = React.createClass({
 	getInitialState: function(){
 		return{
@@ -34,22 +37,22 @@ module.exports = React.createClass({
 			loaded: false,
 			isReloadRequired: false,
 			isRefreshing: false,
-			isEnabled: true
+			isEnabled: false
 		}
 	},
 	componentWillMount: function(){
-		var _this = this;
-		InteractionManager.runAfterInteractions(() => {
-			_this.loadData();
-		});
+		InteractionManager.runAfterInteractions(() =>{
+			this.loadData();
+		})
 	},	
 	loadData: function(){
 		
+		clearTimeout(timeout);
 		var _this = this;
 		this.API();
 
 		//check if data is loaded
-		setTimeout(function(){
+		timeout = setTimeout(function(){
 			if(_this.isMounted()){
 				if(_this.state.loaded===false){
 					_this.setState({
@@ -62,7 +65,7 @@ module.exports = React.createClass({
 	API: function(){
 
 		var _this = this;
-		this.setState({ rawData: [], isReloadRequired: false, loaded: false, isRefreshing: true });
+		this.setState({ isReloadRequired: false, loaded: false, isRefreshing: true, isEnabled: false });
 
 		Parse.Cloud.run('fetchBookingListForUserCloudFunction', {
 			user_id: Parse.User.current().getUsername()
@@ -75,15 +78,16 @@ module.exports = React.createClass({
 				}
 
 				_this.setState({
-					rawData: _this.state.rawData.concat(cleanData),
+					rawData: cleanData,
 					dataSource: _this.state.dataSource.cloneWithRows(cleanData),
 					loaded: true,
 					isReloadRequired: false,
 					isRefreshing: false,
+					isEnabled: true
 				});
 			},
 			function(error){
-				_this.setState({ isReloadRequired: true, loaded: false, isRefreshing: false })
+				_this.setState({ isReloadRequired: true, loaded: false, isRefreshing: false, isEnabled: true })
 				console.log("[HOME API] Error: "+ JSON.stringify(error, null, 2));
 			}
 		);
@@ -98,46 +102,46 @@ module.exports = React.createClass({
         			sidebarRef={this}
         			isChildView={true}
       			/>
-    				{ this.state.loaded ? this.renderListView() : this.renderLoadingView() }
+      				<ScrollView
+	  					refreshControl={
+	  						<RefreshControl 
+	        					refreshing={this.state.isRefreshing}
+	        					onRefresh={this.loadData}
+	        					enabled={this.state.isEnabled}
+	        					colors={['#2196F3', '#E91E63', '#FBC02D', '#607D8B']}
+							/>
+						}      				
+      				>
+      					{this.state.loaded ? this.renderListView() : this.renderLoadingView()}
+      				</ScrollView>
   			</View>
 		)
 	},
 	renderListView: function(){
-		if(this.state.rawData.length > 0){
+		if(this.state.rawData.length === 0){
 			return(
-				<ListView 
-					dataSource={this.state.dataSource}
-	    			renderRow={this.renderReservation}
-	    			style={styles.listView}
-	    			renderScrollComponent={props=>
-						<ScrollView
-							refreshControl={
-								<RefreshControl 
-	                				refreshing={this.state.isRefreshing}
-	                				onRefresh={this.loadData}
-								/>
-	            			}
-        					contentContainerStyle={styles.container}
-        					{...props}
-						/>
-	    			}
-	    		/>
+				<View style={styles.container}>
+					<TouchableWithoutFeedback onPress={this.onPressPop}>
+		      			<View style={styles.noRecordsFoundScene}>
+		      				<View style={styles.centerWeighted}>
+		      					<Icon name="error" size={100} color="#cccccc" />
+		      					<Text style={styles.errorMessageReload}>You have no meetings.</Text>
+		      					<Text>Tap to book.</Text>
+		      				</View>
+						</View>
+					</TouchableWithoutFeedback>
+				</View>
 			);
 		}
 		return(
-			<View style={styles.container}>
-				<TouchableWithoutFeedback onPress={this.onPressPop}>
-	      			<View style={styles.noRecordsFoundScene}>
-	      				<View style={styles.centerWeighted}>
-	      					<Icon name="error" size={100} color="#cccccc" />
-	      					<Text style={styles.errorMessageReload}>You have no meetings.</Text>
-	      					<Text>Tap to book.</Text>
-	      				</View>
-					</View>
-				</TouchableWithoutFeedback>
-			</View>
+			<View style={[styles.container]}>
+				<ListView 
+					dataSource={this.state.dataSource}
+	    			renderRow={this.renderReservation}
+	    			style={styles.listView}		    			
+	    		/>
+    		</View>
 		);		
-			
 	},
 	onPressPop: function(){
 		this.props.navigator.pop();

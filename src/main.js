@@ -7,7 +7,6 @@ var {
 	AppRegistry,
 	StyleSheet,
 	Navigator,
-	Image,
 	Alert,
 	View,
 	Text
@@ -88,7 +87,7 @@ module.exports = React.createClass({
 				renderScene={ this.renderScene } 
 				configureScene={ () => { return Navigator.SceneConfigs.PushFromRight; }}
 			>
-			</Navigator>        	
+			</Navigator>
         )
     },
     renderScene: function(route, navigator){
