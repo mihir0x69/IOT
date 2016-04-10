@@ -6,6 +6,7 @@ var {
 	InteractionManager,
   	TouchableHighlight,
   	RefreshControl,
+	AsyncStorage,
   	ScrollView,
   	StyleSheet,
   	Dimensions,
@@ -37,19 +38,36 @@ module.exports = React.createClass({
 			loaded: false,
 			isReloadRequired: false,
 			isRefreshing: false,
-			isEnabled: false
+			isEnabled: false,
+			cache: ''
 		}
 	},
-	componentWillMount: function(){
+	componentWillMount: async function(){
+
+		var flag = await AsyncStorage.getItem('FORCE_UPDATE');
+		flag = (flag === "true");
+
 		InteractionManager.runAfterInteractions(() =>{
-			this.loadData();
+			if(flag){
+				this.loadData('API');
+			}
+			else{
+				this.loadData('CACHE');
+			}
 		})
 	},	
-	loadData: function(){
+	loadData: function(mode){
+
+		switch(mode){
+			case 'CACHE': 	this.loadFromCache();
+							break;
+			case 'API':  	this.API();
+							break;
+		}
+
 		
 		clearTimeout(timeout);
 		var _this = this;
-		this.API();
 
 		//check if data is loaded
 		timeout = setTimeout(function(){
@@ -85,12 +103,32 @@ module.exports = React.createClass({
 					isRefreshing: false,
 					isEnabled: true
 				});
+				_this.updateCache();
 			},
 			function(error){
 				_this.setState({ isReloadRequired: true, loaded: false, isRefreshing: false, isEnabled: true })
 				console.log("[HOME API] Error: "+ JSON.stringify(error, null, 2));
 			}
 		);
+	},
+	loadFromCache: async function(){
+		var array = await AsyncStorage.getItem('MEETING_LIST');
+		array = JSON.parse(array);
+
+		this.setState({
+			rawData: array,
+			dataSource: this.state.dataSource.cloneWithRows(array),
+			loaded: true,
+			isRefreshing: false,
+			isEnabled: true
+		});
+	},	
+	updateCache: async function(){
+		await AsyncStorage.removeItem('FORCE_UPDATE');
+		await AsyncStorage.setItem('FORCE_UPDATE', JSON.stringify(false));
+
+		await AsyncStorage.removeItem('MEETING_LIST');
+		await AsyncStorage.setItem('MEETING_LIST', JSON.stringify(this.state.rawData));
 	},
 	render: function(){
 		return(
@@ -106,11 +144,11 @@ module.exports = React.createClass({
 	  					refreshControl={
 	  						<RefreshControl 
 	        					refreshing={this.state.isRefreshing}
-	        					onRefresh={this.loadData}
+	        					onRefresh={this.loadData.bind(this, 'API')}
 	        					enabled={this.state.isEnabled}
 	        					colors={['#2196F3', '#E91E63', '#FBC02D', '#607D8B']}
 							/>
-						}      				
+						}
       				>
       					{this.state.loaded ? this.renderListView() : this.renderLoadingView()}
       				</ScrollView>
@@ -138,7 +176,7 @@ module.exports = React.createClass({
 				<ListView 
 					dataSource={this.state.dataSource}
 	    			renderRow={this.renderReservation}
-	    			style={styles.listView}		    			
+	    			style={styles.listView}
 	    		/>
     		</View>
 		);		
@@ -148,7 +186,11 @@ module.exports = React.createClass({
 	},
 	renderLoadingView: function(){
 		if(this.state.isReloadRequired){
-			return <ReloadView loadData={this.loadData} />
+			return(
+				<ScrollView contentContainerStyle={styles.container}>
+					<ReloadView loadData={this.loadData.bind(this, 'API')} />
+				</ScrollView>
+			);
 		}	
 		return <LoadingView />
 	},

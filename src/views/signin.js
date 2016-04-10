@@ -104,14 +104,31 @@ module.exports = React.createClass({
 						interactionDisabled: false
 					});
 				}
-				console.log(user);
-				try{
-					await AsyncStorage.setItem('IS_LOGGED_IN', 'SECRET_KEY');
-					_this.props.navigator.immediatelyResetRouteStack([{name: 'home'}]);
-				}
-				catch(e){
-					console.warn('[SIGN IN]', e);
-				}
+
+				Parse.Cloud.run('fetchBookingListForUserCloudFunction', {
+					user_id: Parse.User.current().getUsername()
+				}).then(
+
+					async function(result){
+						var cleanData = [];
+						for(var i=0;i<result.length;i++){
+							cleanData.push(result[i].toJSON());
+						}
+						try{
+							await AsyncStorage.removeItem('MEETING_LIST');
+							await AsyncStorage.setItem('MEETING_LIST', JSON.stringify(cleanData));
+							await AsyncStorage.setItem('IS_LOGGED_IN', 'SECRET_KEY');
+							_this.props.navigator.immediatelyResetRouteStack([{name: 'home'}]);
+						}
+						catch(e){
+							console.warn(e);
+						}
+					},
+					function(error){
+						console.warn(error);
+						console.log("[MEETING API] Error: "+ JSON.stringify(error, null, 2));
+					}
+				);
 			},
 			error: (data, error) => {
 				console.log(data, error);

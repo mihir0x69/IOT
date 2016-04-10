@@ -2,6 +2,7 @@ var React = require('react-native');
 
 var {
 	TouchableWithoutFeedback,
+	Dimensions,
 	StyleSheet,
 	Image,
 	View,
@@ -10,6 +11,8 @@ var {
 
 var ToolbarBeforeLoad = require('./toolbarBeforeLoad');
 var Icon = require('react-native-vector-icons/MaterialIcons');
+
+var {height, width} = Dimensions.get('window');
 
 module.exports = React.createClass({
 
@@ -35,7 +38,8 @@ module.exports = React.createClass({
 
 const styles = StyleSheet.create({
 	container: {
-		flex: 1
+		flex: 1,
+		height: height-70
 	},
 	reloadScene:{
 		flex: 1,

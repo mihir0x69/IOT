@@ -31,6 +31,8 @@ module.exports = React.createClass({
 					break;
 			case 2: try{
 						await AsyncStorage.removeItem('IS_LOGGED_IN');
+						await AsyncStorage.removeItem('FORCE_UPDATE');
+						await AsyncStorage.removeItem('MEETING_LIST');
 						this.props.navigator.immediatelyResetRouteStack([{name: 'signin'}]);
 					}
 					catch(e){

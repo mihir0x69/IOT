@@ -4,6 +4,7 @@ var React = require('react-native');
 var {
   	TouchableHighlight,
   	ProgressBarAndroid,
+  	AsyncStorage,
   	ScrollView,
   	StyleSheet,
   	TextInput,
@@ -163,11 +164,16 @@ module.exports = React.createClass({
 			description: _description,
 			status_id: _statusId
 		}).then(
-			function(result){
+			async function(result){
+
+				var array;
 				if(result ==="You CANNOT book room"){
 					_this.props.navigator.replace({name: 'failure', data: { date: Moment(_bookDate, "D-M-YYYY").format("MMMM Do YYYY"), room: _this.props.data.room_name, loadData: _this.props.params.loadData} });					
 				}
 				else{
+					await AsyncStorage.removeItem('FORCE_UPDATE');
+					await AsyncStorage.setItem('FORCE_UPDATE', JSON.stringify(true));
+					
 					_this.props.navigator.replace({name: 'success', data: { date: Moment(_bookDate, "D-M-YYYY").format("MMMM Do YYYY"), room: _this.props.data.room_name, loadData: _this.props.params.loadData} });
 				}
 				console.log("[NEW BOOKING API] Success: "+ JSON.stringify(result, null, 2));
