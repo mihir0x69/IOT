@@ -168,7 +168,7 @@ module.exports = React.createClass({
     									</View>
 		        						<View style={styles.inOutTimeWrapper}>
 		        							<TouchableHighlight 
-		        								onPress={this.onPressChangeInOutTime.bind(this, "IN", {hour: this._parseHour(this.state.selectedInTime), minute: this._parseMinute(this.state.selectedInTime), is24Hour: true})}
+		        								onPress={this.onPressChangeInOutTime.bind(this, "IN", {hour: this._parseHour(this.state.selectedInTime), minute: this._parseMinute(this.state.selectedInTime)})}
 		        								underlayColor={'#1E88E5'}
 		        							>
 		        								<Text style={styles.monthYearText}>
@@ -177,7 +177,7 @@ module.exports = React.createClass({
 		        							</TouchableHighlight>
 		        							<Text style={styles.monthYearText}> - </Text>
 		        							<TouchableHighlight 
-		        								onPress={this.onPressChangeInOutTime.bind(this, "OUT", {hour: this._parseHour(this.state.selectedOutTime), minute: this._parseMinute(this.state.selectedOutTime), is24Hour: true})}
+		        								onPress={this.onPressChangeInOutTime.bind(this, "OUT", {hour: this._parseHour(this.state.selectedOutTime), minute: this._parseMinute(this.state.selectedOutTime)})}
 		        								underlayColor={'#1E88E5'}
 		        							>
 		        								<Text style={styles.monthYearText}>
@@ -349,7 +349,7 @@ module.exports = React.createClass({
 		var _this = this;
 		Alert.alert(
 			"What's wrong with the time?",
-			"Your time is automatically adjusted to the nearest half-hour slot.",
+			"We use 24-hour format. And your time is automatically adjusted to the nearest half-hour slot.",
             [
               	{text: 'OK', onPress: () => console.log('Cancel Pressed!')}
             ]

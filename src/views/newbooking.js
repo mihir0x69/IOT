@@ -167,19 +167,17 @@ module.exports = React.createClass({
 			async function(result){
 
 				var array;
-				if(result ==="You CANNOT book room"){
-					_this.props.navigator.replace({name: 'failure', data: { date: Moment(_bookDate, "D-M-YYYY").format("MMMM Do YYYY"), room: _this.props.data.room_name, loadData: _this.props.params.loadData} });					
-				}
-				else{
-					await AsyncStorage.removeItem('FORCE_UPDATE');
-					await AsyncStorage.setItem('FORCE_UPDATE', JSON.stringify(true));
+				await AsyncStorage.removeItem('FORCE_UPDATE');
+				await AsyncStorage.setItem('FORCE_UPDATE', JSON.stringify(true));
 					
-					_this.props.navigator.replace({name: 'success', data: { date: Moment(_bookDate, "D-M-YYYY").format("MMMM Do YYYY"), room: _this.props.data.room_name, loadData: _this.props.params.loadData} });
-				}
+				_this.props.navigator.replace({name: 'success', data: { date: Moment(_bookDate, "D-M-YYYY").format("MMMM Do YYYY"), room: _this.props.data.room_name, loadData: _this.props.params.loadData} });
 				console.log("[NEW BOOKING API] Success: "+ JSON.stringify(result, null, 2));
 			},
 			function(error){
-				_this.setState({ disableSubmit: false, buttonColor: '#2196F3', loader: BlankImage });
+				_this.setState({ disableSubmit: false, buttonColor: '#2196F3' });
+				if(error.code===141){
+					_this.props.navigator.replace({name: 'failure', data: { date: Moment(_bookDate, "D-M-YYYY").format("MMMM Do YYYY"), room: _this.props.data.room_name, loadData: _this.props.params.loadData} });
+				}
 				console.log("[NEW BOOKING API] Error: "+ JSON.stringify(error, null, 2));
 			}
 		);							

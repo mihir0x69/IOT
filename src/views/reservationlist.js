@@ -7,6 +7,7 @@ var {
   	TouchableHighlight,
   	RefreshControl,
 	AsyncStorage,
+	Dimensions,
   	ScrollView,
   	StyleSheet,
   	Dimensions,
@@ -27,6 +28,7 @@ var ReloadView = require('../components/reloadview');
 var MeetingItem = require('../components/meetingitem');
 
 var timeout;
+var {height, width} = Dimensions.get('window');
 
 module.exports = React.createClass({
 	getInitialState: function(){
@@ -158,17 +160,19 @@ module.exports = React.createClass({
 	renderListView: function(){
 		if(this.state.rawData.length === 0){
 			return(
-				<View style={styles.container}>
-					<TouchableWithoutFeedback onPress={this.onPressPop}>
-		      			<View style={styles.noRecordsFoundScene}>
-		      				<View style={styles.centerWeighted}>
-		      					<Icon name="error" size={100} color="#cccccc" />
-		      					<Text style={styles.errorMessageReload}>You have no meetings.</Text>
-		      					<Text>Tap to book.</Text>
-		      				</View>
-						</View>
-					</TouchableWithoutFeedback>
-				</View>
+				<ScrollView contentContainerStyle={styles.container}>
+					<View style={[styles.container, {height: height-80}]}>
+						<TouchableWithoutFeedback onPress={this.onPressPop}>
+			      			<View style={styles.noRecordsFoundScene}>
+			      				<View style={styles.centerWeighted}>
+			      					<Icon name="error" size={100} color="#cccccc" />
+			      					<Text style={styles.errorMessageReload}>You have no meetings.</Text>
+			      					<Text>Tap to book.</Text>
+			      				</View>
+							</View>
+						</TouchableWithoutFeedback>
+					</View>
+				</ScrollView>
 			);
 		}
 		return(

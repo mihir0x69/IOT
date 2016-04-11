@@ -110,12 +110,15 @@ module.exports = React.createClass({
 				}).then(
 
 					async function(result){
+						var keys = ['IS_LOGGED_IN', 'FORCE_UPDATE', 'MEETING_LIST'];
 						var cleanData = [];
 						for(var i=0;i<result.length;i++){
 							cleanData.push(result[i].toJSON());
 						}
 						try{
-							await AsyncStorage.removeItem('MEETING_LIST');
+							await AsyncStorage.multiRemove(keys, (error)=>{
+								console.log(error);
+							});
 							await AsyncStorage.setItem('MEETING_LIST', JSON.stringify(cleanData));
 							await AsyncStorage.setItem('IS_LOGGED_IN', 'SECRET_KEY');
 							_this.props.navigator.immediatelyResetRouteStack([{name: 'home'}]);
@@ -131,6 +134,7 @@ module.exports = React.createClass({
 				);
 			},
 			error: (data, error) => {
+				clearInterval(interval);
 				console.log(data, error);
 				var errorText;
 
@@ -142,7 +146,6 @@ module.exports = React.createClass({
 					default : 	errorText="Something went wrong."
 								break;
 				}
-				clearInterval(interval);
 				if(_this.isMounted()){
 					_this.setState({
 						currentPhrase: errorText,

@@ -24,15 +24,16 @@ module.exports = React.createClass({
 	},
 	_onActionSelected: async function(position){
 		var storage;
+		var keys = ['IS_LOGGED_IN', 'FORCE_UPDATE', 'MEETING_LIST'];
 		switch(position){
 			case 0: if(this.props.title!=="About"){
 						this.props.navigator.push({name: 'about'});
 					}
 					break;
 			case 2: try{
-						await AsyncStorage.removeItem('IS_LOGGED_IN');
-						await AsyncStorage.removeItem('FORCE_UPDATE');
-						await AsyncStorage.removeItem('MEETING_LIST');
+						await AsyncStorage.multiRemove(keys, (error)=>{
+							console.log(error);
+						});
 						this.props.navigator.immediatelyResetRouteStack([{name: 'signin'}]);
 					}
 					catch(e){

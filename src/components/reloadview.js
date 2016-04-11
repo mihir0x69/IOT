@@ -39,7 +39,7 @@ module.exports = React.createClass({
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		height: height-70
+		height: height-80
 	},
 	reloadScene:{
 		flex: 1,
