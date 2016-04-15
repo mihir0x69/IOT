@@ -77,13 +77,13 @@ module.exports = React.createClass({
 		if(this.state.interactionDisabled){
 			return;
 		}
-		if(this.state.username===""){
+		if(this.state.username.trim()===""){
 			return this.setState({
 				currentPhrase: 'Username is missing.',
 				phraseColor: '#1A237E'
 			});
 		}
-		if(this.state.password===""){
+		if(this.state.password.trim()===""){
 			return this.setState({
 				currentPhrase: 'Password is missing.',
 				phraseColor: '#1A237E'

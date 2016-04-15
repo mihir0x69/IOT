@@ -95,7 +95,9 @@ module.exports = React.createClass({
 				//Convert ParseObject to JSON; then push into an array.
 				var cleanData = [];
 				for(var i=0;i<result.length;i++){
-					cleanData.push(result[i].toJSON());
+					if(result[i].toJSON().room_name !== undefined){
+						cleanData.push(result[i].toJSON());
+					}
 				}
 
 				console.log("[HOME API] Success: ", cleanData);

@@ -77,25 +77,25 @@ module.exports = React.createClass({
 			return;
 		}
 		var _this=this;
-		if(this.state.username===""){
+		if(this.state.username.trim()===""){
 			return this.setState({
 				message: 'Username is mandatory',
 				messageColor: '#e53935'
 			});
 		}
-		if(this.state.password===""){
+		if(this.state.password.trim()===""){
 			return this.setState({
 				message: 'You need a password!',
 				messageColor: '#e53935'
 			});
 		}		
-		if(this.state.passwordConfirmation===""){
+		if(this.state.passwordConfirmation.trim()===""){
 			return this.setState({
 				message: 'Please confirm your password',
 				messageColor: '#e53935'
 			});
 		}
-		if(this.state.password !== this.state.passwordConfirmation){
+		if(this.state.password.trim() !== this.state.passwordConfirmation.trim()){
 			return this.setState({
 				message: 'Passwords do not match. Please try again.',
 				messageColor: '#e53935'
@@ -105,8 +105,8 @@ module.exports = React.createClass({
 		Parse.User.logOut();
 
 		var user = new Parse.User();
-		user.set('username', this.state.username);
-		user.set('password', this.state.password);
+		user.set('username', this.state.username.trim());
+		user.set('password', this.state.password.trim());
 
 		console.log('calling api...');
 
@@ -130,16 +130,16 @@ module.exports = React.createClass({
 				_this.setState({ interactionDisabled: false, message: errorText, messageColor: '#e53935' });
 			}
 		});
-		setTimeout(function(){
-			if(_this.state.interactionDisabled === true){
-				clearInterval(interval);
-				_this.setState({
-					message: 'Something went wrong. Please try again.',
-					messageColor: '#e53935',
-					interactionDisabled: false
-				})
-			}
-		}, 10000);		
+		// setTimeout(function(){
+		// 	if(_this.state.interactionDisabled === true){
+		// 		clearInterval(interval);
+		// 		_this.setState({
+		// 			message: 'Something went wrong. Please try again.',
+		// 			messageColor: '#e53935',
+		// 			interactionDisabled: false
+		// 		})
+		// 	}
+		// }, 10000);		
 	}
 });
 

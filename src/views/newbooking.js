@@ -137,7 +137,7 @@ module.exports = React.createClass({
 			return;
 		}
 
-		if(!this.state.title){
+		if(!this.state.title.trim()){
 			this.setState({errorTitle: 'You need a cool title!'});
 			return;
 		}
@@ -150,8 +150,8 @@ module.exports = React.createClass({
 		var _bookDate = Moment(Moment(this.props.params.date).format("D-M-YYYY") + " " + Moment(this.props.params.inTime, "H:m").format("H.m"), "D-M-YYYY H:m").subtract(Moment().utcOffset(), "minutes").format("D-M-YYYY");
 		var _roomMacId = this.props.data.room_mac_id;
 		var _userId = Parse.User.current().getUsername();
-		var _title = this.state.title;
-		var _description = this.state.description;
+		var _title = this.state.title.trim();
+		var _description = this.state.description.trim();
 		var _statusId = 1;
 
 		Parse.Cloud.run('bookRoomFromAppCloudFunction', {
