@@ -8,6 +8,7 @@ var {
   	TimePickerAndroid,
   	DatePickerAndroid,
   	RefreshControl,
+  	AsyncStorage,
   	ToastAndroid,
   	ScrollView,
   	StyleSheet,
@@ -258,16 +259,16 @@ module.exports = React.createClass({
 							<Text style={styles.sidebarItemtext}>My Reservations</Text>
 						</View>
 					</TouchableHighlight>
-					<TouchableHighlight underlayColor={'#f5f5f5'}>
+					<TouchableHighlight underlayColor={'#f5f5f5'} onPress={this.onPressAboutApp}>
 						<View style={styles.sidebarItem}>
-							<Icon name="error-outline" size={24} color="#999999" />
-							<Text style={styles.sidebarItemtext}>Important Meetings</Text>
+							<Icon name="info-outline" size={24} color="#999999" />
+							<Text style={styles.sidebarItemtext}>About App</Text>
 						</View>
 					</TouchableHighlight>
-					<TouchableHighlight underlayColor={'#f5f5f5'}>
+					<TouchableHighlight underlayColor={'#f5f5f5'} onPress={this.onPressLogout}>
 						<View style={styles.sidebarItem}>
-							<Icon name="settings" size={24} color="#999999" />
-							<Text style={styles.sidebarItemtext}>Configuration</Text>
+							<Icon name="keyboard-tab" size={24} color="#999999" />
+							<Text style={styles.sidebarItemtext}>Logout</Text>
 						</View>
 					</TouchableHighlight>
 				</View>
@@ -357,7 +358,26 @@ module.exports = React.createClass({
 	},	
 	onPressReservationList: function(){
 		this.refs['DRAWER'].closeDrawer();
-		this.props.navigator.push({ name: 'reservationlist' })	
+		this.props.navigator.push({ name: 'reservationlist' });
+	},
+	onPressAboutApp: function(){
+		this.refs['DRAWER'].closeDrawer();
+		this.props.navigator.push({ name: 'about' });
+	},	
+	onPressLogout: async function(){
+		var keys = ['IS_LOGGED_IN', 'FORCE_UPDATE', 'MEETING_LIST'];
+
+		this.refs['DRAWER'].closeDrawer();
+
+		try{
+			await AsyncStorage.multiRemove(keys, (error)=>{
+				console.log(error);
+			});
+			this.props.navigator.immediatelyResetRouteStack([{name: 'signin'}]);
+		}
+		catch(e){
+			console.log('LOG OUT', e);
+		}
 	},
 	_parseHour: function(time){
 		time = time.format("H:m");

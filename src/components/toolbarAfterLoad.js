@@ -7,6 +7,7 @@ var {
 } = React;
 
 var Icon = require('react-native-vector-icons/MaterialIcons');
+var dismissKeyboard = require('react-native-dismiss-keyboard');
 
 module.exports = React.createClass({
 	render: function(){
@@ -16,7 +17,7 @@ module.exports = React.createClass({
             	title={this.props.title}
             	titleColor="#ffffff"
             	style={styles.toolbar}
-            	actions={[{title: 'About App', show: 'never'}, {title: 'Settings', show: 'never'}, {title: 'Logout', show: 'never'}]}
+            	actions={[{title: 'About App', show: 'never'}, {title: 'Logout', show: 'never'}]}
             	onActionSelected={this._onActionSelected}
             	onIconClicked={this._onIconClicked}
           	/>
@@ -27,17 +28,19 @@ module.exports = React.createClass({
 		var keys = ['IS_LOGGED_IN', 'FORCE_UPDATE', 'MEETING_LIST'];
 		switch(position){
 			case 0: if(this.props.title!=="About"){
+						dismissKeyboard();
 						this.props.navigator.push({name: 'about'});
 					}
 					break;
-			case 2: try{
+			case 1: try{
+						dismissKeyboard();
 						await AsyncStorage.multiRemove(keys, (error)=>{
 							console.log(error);
 						});
 						this.props.navigator.immediatelyResetRouteStack([{name: 'signin'}]);
 					}
 					catch(e){
-						console.warn('LOG OUT', e);
+						console.log('LOG OUT', e);
 					}
 					break;
 		}

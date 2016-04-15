@@ -79,22 +79,26 @@ module.exports = React.createClass({
 		var _this=this;
 		if(this.state.username===""){
 			return this.setState({
-				message: 'Username is mandatory'
+				message: 'Username is mandatory',
+				messageColor: '#e53935'
 			});
 		}
 		if(this.state.password===""){
 			return this.setState({
-				message: 'You need a password!'
+				message: 'You need a password!',
+				messageColor: '#e53935'
 			});
 		}		
 		if(this.state.passwordConfirmation===""){
 			return this.setState({
-				message: 'Please confirm your password'
+				message: 'Please confirm your password',
+				messageColor: '#e53935'
 			});
 		}
 		if(this.state.password !== this.state.passwordConfirmation){
 			return this.setState({
-				message: 'Passwords do not match. Please try again.'
+				message: 'Passwords do not match. Please try again.',
+				messageColor: '#e53935'
 			});
 		}
 

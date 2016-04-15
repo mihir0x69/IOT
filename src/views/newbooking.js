@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
 		color: '#5f5f5f',
 	},
 	errorMessage: {
-		color: '#1A237E',
+		color: '#ffffff',
 		fontSize: 12,
 		marginLeft: 3,
 		marginBottom: 10

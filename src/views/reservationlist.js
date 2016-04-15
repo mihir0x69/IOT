@@ -134,7 +134,7 @@ module.exports = React.createClass({
 	},
 	render: function(){
 		return(
-    		<View style={styles.container}>
+    		<View style={[styles.container, {backgroundColor: '#ffffff'}]}>
           		<ToolbarAfterLoad
           			navIcon={'arrow-back'}
 	        		title={'My Reservations'}
