@@ -141,7 +141,7 @@ module.exports = React.createClass({
 		}
 
 		var _this = this;
-		this.setState({ disableSubmit: true, buttonColor: '#939393', loader: LoaderImage });
+		this.setState({ disableSubmit: true, buttonColor: '#939393' });
 
 		var _bookFromTime = parseFloat(Moment(this.props.params.inTime, "H.m").subtract(Moment().utcOffset(), "minutes").format("H.mm"));
 		var _bookToTime = parseFloat(Moment(this.props.params.outTime, "H.m").subtract(Moment().utcOffset(), "minutes").format("H.mm"));
@@ -267,9 +267,4 @@ const styles = StyleSheet.create({
 		marginLeft: 3,
 		marginBottom: 10
 	},
-	loaderImage: {
-		width: 13, 
-		height: 13, 
-		marginTop: 9
-	}
 });

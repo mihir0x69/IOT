@@ -12,6 +12,7 @@ var {
 var Icon = require('react-native-vector-icons/MaterialIcons');
 var Button = require('../components/button');
 var Parse = require('parse/react-native').Parse;
+var dismissKeyboard = require('react-native-dismiss-keyboard');
 
 module.exports = React.createClass({
 
@@ -72,6 +73,8 @@ module.exports = React.createClass({
 		)
 	},
 	onSignupPress: function(){
+
+		dismissKeyboard();
 
 		if(this.state.interactionDisabled){
 			return;
