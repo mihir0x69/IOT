@@ -17,12 +17,11 @@ var {
 //get libraries
 var Parse = require('parse/react-native').Parse;
 var Moment = require('moment');
+var Icon = require('react-native-vector-icons/MaterialIcons');
 
 //get components
 var ToolbarAfterLoad = require('../components/toolbarAfterLoad');
-var LoaderImage = require('../../assets/images/rolling.gif');
-var BlankImage = require('../../assets/images/1x1.png');
-var Icon = require('react-native-vector-icons/MaterialIcons');
+
 
 module.exports = React.createClass({
 	getInitialState: function(){
@@ -32,7 +31,6 @@ module.exports = React.createClass({
 			errorTitle: '',
 			disableSubmit: false,
 			buttonColor: '#2196F3',
-			loader: BlankImage,
 			bookingResult: ''
 		}
 	},

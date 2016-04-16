@@ -16,6 +16,7 @@ var {
   	TextInput,
   	ListView,
   	Platform,
+  	AppState,
   	Alert,
   	Image,
   	Text,
@@ -129,7 +130,7 @@ module.exports = React.createClass({
         		<View style={styles.container}>
 	          		<ToolbarAfterLoad
 	          			navIcon={'menu'}
-    	        		title={'Home'}
+    	        		title={'Dashboard'}
         	    		navigator={this.props.navigator}
             			sidebarRef={this}
             			isChildView={false}
@@ -166,7 +167,7 @@ module.exports = React.createClass({
     											onPress={this.onPressHelp}
     											underlayColor={'#1E88E5'}
     										>
-    											<Text style={styles.helpText}>[?]</Text>
+    											<Icon name="help-outline" size={16} color="#ffffff" style={{marginTop: 1}} />
     										</TouchableHighlight>
     									</View>
 		        						<View style={styles.inOutTimeWrapper}>
@@ -245,19 +246,22 @@ module.exports = React.createClass({
 			<Room data={room} params={{date: this.state.selectedDate, inTime: this.state.selectedInTime, outTime: this.state.selectedOutTime, loadData: this.loadData }} navigator={this.props.navigator} />
 		)
 	},
-	renderEmptyView: function(){
-		return <Text>hi</Text>
-	},
 	renderNavigationView: function(){
 	    return(
 			<View style={[styles.container, {backgroundColor: '#ffffff'}]}>
 				<View style={styles.sidebarHeader}>
-					<Image source={require('../../assets/images/backdrop.png')} style={styles.canvas} />
+					<Image source={require('../../assets/images/backdrop2.png')} style={styles.canvas} />
 				</View>
 				<View style={styles.sidebarBody}>
+					<TouchableHighlight style={{backgroundColor: '#f5f5f5'}} underlayColor={'#f5f5f5'}>
+						<View style={styles.sidebarItem}>
+							<Icon name="home" size={24} color="#000000" />
+							<Text style={styles.sidebarItemtext}>Dashboard</Text>
+						</View>
+					</TouchableHighlight>				
 					<TouchableHighlight underlayColor={'#f5f5f5'} onPress={this.onPressReservationList}>
 						<View style={styles.sidebarItem}>
-							<Icon name="list" size={24} color="#999999" />
+							<Icon name="reorder" size={24} color="#999999" />
 							<Text style={styles.sidebarItemtext}>My Reservations</Text>
 						</View>
 					</TouchableHighlight>
@@ -269,7 +273,7 @@ module.exports = React.createClass({
 					</TouchableHighlight>
 					<TouchableHighlight underlayColor={'#f5f5f5'} onPress={this.onPressLogout}>
 						<View style={styles.sidebarItem}>
-							<Icon name="keyboard-tab" size={24} color="#999999" />
+							<Icon name="input" size={22} color="#999999" />
 							<Text style={styles.sidebarItemtext}>Logout</Text>
 						</View>
 					</TouchableHighlight>
@@ -432,18 +436,26 @@ const styles = StyleSheet.create({
 		backgroundColor: '#ffffff'
 	},
 	sidebarBody: {
-		flex: 2
+		flex: 2,
+		marginTop: 15,
+		backgroundColor: '#ffffff'
 	},
 	sidebarItem: {
-		margin: 15,
+		margin: 13,
 		flexDirection: 'row'
 	},
 	sidebarItemtext: {
 		fontSize: 15,
 		marginLeft: 20,
 		marginTop: 1.5,
-		color: '#888888'
+		color: '#111111'
 	},
+	sidebarItemtextActive: {
+		fontSize: 15,
+		marginLeft: 20,
+		marginTop: 1.5,
+		color: '#000000'
+	},	
 	panel: {
 		padding: 10,
 		backgroundColor: '#2196F3',
