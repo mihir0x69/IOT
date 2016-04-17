@@ -35,12 +35,12 @@ module.exports = React.createClass({
 			case 1: try{
 						dismissKeyboard();
 						await AsyncStorage.multiRemove(keys, (error)=>{
-							console.log(error);
+							console.warn(error);
 						});
 						this.props.navigator.immediatelyResetRouteStack([{name: 'signin'}]);
 					}
 					catch(e){
-						console.log('LOG OUT', e);
+						console.warn('LOG OUT', e);
 					}
 					break;
 		}

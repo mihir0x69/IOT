@@ -26,6 +26,7 @@ var {
 //get libraries
 var Parse = require('parse/react-native').Parse;
 var Moment = require('moment');
+var TimerMixin = require('react-timer-mixin');
 
 //get components
 var ToolbarAfterLoad = require('../components/toolbarAfterLoad');
@@ -36,11 +37,15 @@ var Room = require('../components/room');
 
 //get device dimensions
 const {height, width} = Dimensions.get('window');
-var timeout;
+var timeout, timer;
 
 module.exports = React.createClass({
 
+	mixins: [TimerMixin],
 	getInitialState: function(){
+
+		/**replace new Date() with timestring from the server *//**replace new Date() with timestring from the server */
+		/**replace new Date() with timestring from the server *//**replace new Date() with timestring from the server */
 		return{
 			rawData: [],
 			dataSource: new ListView.DataSource({
@@ -50,14 +55,38 @@ module.exports = React.createClass({
 			isReloadRequired: false,
 			isEnabled: false,
 			isRefreshing: false,
-			selectedDate: Moment(),
-			selectedInTime: roundToNextSlot(Moment()),
-			selectedOutTime: roundToNextSlot(Moment()).add(30, "minutes"),
+			serverTime: new Date(),
+			selectedDate: Moment(new Date()),
+			selectedInTime: roundToNextSlot(Moment(new Date())),
+			selectedOutTime: roundToNextSlot(Moment(new Date())).add(30, "minutes"),
+			interactionDisabled: true
 		}
 	},
 	componentWillMount: function(){
-		this.loadData();
+		this.initEpoch();
 	},
+	initEpoch: function(){
+
+		var _this = this;
+
+		/*** get time from server in local format **//*** get time from server in local format **/
+		/*** get time from server in local format **//*** get time from server in local format **/
+
+		timer = this.setInterval(function(){
+			_this.setState({ serverTime: new Date(_this.state.serverTime.getTime() + 1000) });
+			if((_this.state.serverTime.getMinutes() === 0 || _this.state.serverTime.getMinutes() === 30) && (_this.state.serverTime.getSeconds() === 0)){
+				_this.setState({
+					interactionDisabled: true,
+					selectedDate: Moment(_this.state.serverTime),
+					selectedInTime: roundToNextSlot(Moment(_this.state.serverTime)),
+					selectedOutTime: roundToNextSlot(Moment(_this.state.serverTime).add(30, "minutes")),
+				});
+				_this.loadData();
+			}
+		}, 1000);
+
+		this.loadData();
+	},	
 	loadData: function(){
 		
 		clearTimeout(timeout);
@@ -69,6 +98,8 @@ module.exports = React.createClass({
 			if(_this.isMounted()){
 				if(_this.state.loaded===false){
 					_this.setState({
+						isRefreshing: false,
+						isEnabled: true,
 						isReloadRequired: true
 					})
 				}
@@ -109,11 +140,12 @@ module.exports = React.createClass({
 					loaded: true,
 					isReloadRequired: false,
 					isEnabled: true,
-					isRefreshing: false
+					isRefreshing: false,
+					interactionDisabled: false
 				});
 			},
 			function(error){
-				_this.setState({ isReloadRequired: true, loaded: false, isEnabled: true, isRefreshing: false })
+				_this.setState({ isReloadRequired: true, loaded: false, isEnabled: true, isRefreshing: false, interactionDisabled: false });
 				console.log("[HOME API] Error: "+ JSON.stringify(error, null, 2));
 			}
 		);
@@ -282,6 +314,10 @@ module.exports = React.createClass({
 	    );
 	},
 	onPressChangeDate: async function(options){
+		if(this.state.interactionDisabled){
+			ToastAndroid.show('Please wait. Adjusting to the local time.', ToastAndroid.LONG);
+			return;
+		}
 		const {action, year, month, day} = await DatePickerAndroid.open(options);
 		if (action === DatePickerAndroid.dismissedAction) {
 			return;
@@ -292,6 +328,10 @@ module.exports = React.createClass({
 		this.loadData();
 	},
 	onPressChangeInOutTime: async function(mode, options){
+		if(this.state.interactionDisabled){
+			ToastAndroid.show('Please wait. Adjusting to the local time.', ToastAndroid.LONG);
+			return;
+		}		
 		var {action, minute, hour} = await TimePickerAndroid.open(options);
 		var isTimeAdjusted = false, previousTime;
 

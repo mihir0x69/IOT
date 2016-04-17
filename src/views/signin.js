@@ -10,15 +10,21 @@ var {
 	Text
 } = React;
 
+//get libraries
 var Icon = require('react-native-vector-icons/MaterialIcons');
-var Button = require('../components/button');
 var Parse = require('parse/react-native').Parse;
 var dismissKeyboard = require('react-native-dismiss-keyboard');
+var TimerMixin = require('react-timer-mixin');
+
+//get components
+var Button = require('../components/button');
+
 var interval;
 
 
 module.exports = React.createClass({
 
+	mixins: [TimerMixin],
 	getInitialState: function(){
 		return{
 			username: '',
@@ -99,7 +105,7 @@ module.exports = React.createClass({
 		Parse.User.logIn(this.state.username, this.state.password, {
 			success: async function(user){ 
 
-				clearInterval(interval);
+				_this.clearInterval(interval);
 				if(_this.isMounted()){
 					_this.setState({
 						currentPhrase: '',
@@ -136,7 +142,7 @@ module.exports = React.createClass({
 				);
 			},
 			error: (data, error) => {
-				clearInterval(interval);
+				_this.clearInterval(interval);
 				console.log(data, error);
 				var errorText;
 
@@ -157,9 +163,9 @@ module.exports = React.createClass({
 				}
 			}
 		});
-		setTimeout(function(){
+		this.setTimeout(function(){
 			if(_this.state.interactionDisabled === true){
-				clearInterval(interval);
+				_this.clearInterval(interval);
 				if(_this.isMounted()){
 					_this.setState({
 						currentPhrase: 'Something went wrong. Please try again.',

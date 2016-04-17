@@ -20,6 +20,7 @@ var {
 //get libraries
 var Parse = require('parse/react-native').Parse;
 var Icon = require('react-native-vector-icons/MaterialIcons');
+var TimerMixin = require('react-timer-mixin');
 
 //get components
 var ToolbarAfterLoad = require('../components/toolbarAfterLoad');
@@ -31,6 +32,7 @@ var timeout;
 var {height, width} = Dimensions.get('window');
 
 module.exports = React.createClass({
+	mixins: [TimerMixin],
 	getInitialState: function(){
 		return{
 			rawData: [],
@@ -68,11 +70,11 @@ module.exports = React.createClass({
 		}
 
 		
-		clearTimeout(timeout);
+		this.clearTimeout(timeout);
 		var _this = this;
 
 		//check if data is loaded
-		timeout = setTimeout(function(){
+		timeout = this.setTimeout(function(){
 			if(_this.isMounted()){
 				if(_this.state.loaded===false){
 					_this.setState({

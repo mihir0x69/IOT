@@ -2,6 +2,7 @@
 var React = require('react-native');
 
 var {
+	AsyncStorage,
 	StyleSheet,
 	TextInput,
 	Image,
@@ -9,13 +10,18 @@ var {
 	Text
 } = React;
 
-var Icon = require('react-native-vector-icons/MaterialIcons');
-var Button = require('../components/button');
+//get libraries
+var Icon = require('react-native-vector-icons/MaterialIcons')
 var Parse = require('parse/react-native').Parse;
 var dismissKeyboard = require('react-native-dismiss-keyboard');
+var TimerMixin = require('react-timer-mixin');
+
+//get components
+var Button = require('../components/button');
 
 module.exports = React.createClass({
 
+	mixins: [TimerMixin],
 	getInitialState: function(){
 		return{
 			username: '',
@@ -75,7 +81,6 @@ module.exports = React.createClass({
 	onSignupPress: function(){
 
 		dismissKeyboard();
-
 		if(this.state.interactionDisabled){
 			return;
 		}
@@ -115,8 +120,24 @@ module.exports = React.createClass({
 
 		this.setState({ interactionDisabled: true, message: 'Just a moment...', messageColor: '#cccccc' })
 		user.signUp(null, {
-			success: (user) => { console.log(user);_this.props.navigator.immediatelyResetRouteStack([{name: 'home'}]); },
-			error: (user, error) => { 
+			success: async function(user){ 
+				var keys = ['IS_LOGGED_IN', 'FORCE_UPDATE', 'MEETING_LIST'];
+				var cleanData = [];
+				try{
+					await AsyncStorage.multiRemove(keys, (error)=>{
+						console.log(error);
+					});
+					await AsyncStorage.setItem('IS_LOGGED_IN', 'SECRET_KEY');
+					await AsyncStorage.setItem('MEETING_LIST', JSON.stringify(cleanData));
+				}
+				catch(e){
+					console.log(e);
+				}
+
+				console.log(user);
+				_this.props.navigator.immediatelyResetRouteStack([{name: 'home'}]); 
+			},
+			error: function(user, error){ 
 
 				var errorText;
 				switch(error.code){
@@ -133,16 +154,16 @@ module.exports = React.createClass({
 				_this.setState({ interactionDisabled: false, message: errorText, messageColor: '#e53935' });
 			}
 		});
-		// setTimeout(function(){
-		// 	if(_this.state.interactionDisabled === true){
-		// 		clearInterval(interval);
-		// 		_this.setState({
-		// 			message: 'Something went wrong. Please try again.',
-		// 			messageColor: '#e53935',
-		// 			interactionDisabled: false
-		// 		})
-		// 	}
-		// }, 10000);		
+		this.setTimeout(function(){
+			if(_this.state.interactionDisabled === true){
+				_this.clearInterval(interval);
+				_this.setState({
+					message: 'Something went wrong. Please try again.',
+					messageColor: '#e53935',
+					interactionDisabled: false
+				})
+			}
+		}, 10000);		
 	}
 });
 
