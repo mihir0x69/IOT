@@ -136,6 +136,7 @@ BackAndroid.addEventListener('hardwareBackPress', () => {
     	return false;
   	}
   	if(flag){
+  		
   		_navigator.pop();
   		return true;
   	}

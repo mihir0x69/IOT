@@ -10,6 +10,7 @@ var {
   	RefreshControl,
   	AsyncStorage,
   	ToastAndroid,
+  	BackAndroid,
   	ScrollView,
   	StyleSheet,
   	Dimensions,
