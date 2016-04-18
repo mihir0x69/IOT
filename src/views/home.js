@@ -80,7 +80,6 @@ module.exports = React.createClass({
 	initEpoch: function(){
 
 		var _this = this;
-		var t0 = performance.now();
 		this.clearInterval(timer);
 		this.setState({ isReloadRequired: false, loaded: false, isEnabled: false, isRefreshing: true, interactionDisabled: true });
 
@@ -91,7 +90,6 @@ module.exports = React.createClass({
 
 				//get server time
 				//"Mon Apr 18 2016 17:29:55 GMT+0530 (IST)"
-				var t1 = performance.now();
 				var _serverTime = MomentTZ(MomentTZ.tz(new Date(result), "Asia/Kolkata")); 
 
 				//round in-time to next slot
@@ -242,7 +240,6 @@ module.exports = React.createClass({
 	        							underlayColor={'#1E88E5'}
 	        						>
 		        						<View style={styles.dateWrapper}>
-		        							<Text>{this.state.serverTime.format("H:m:s")}</Text>
 		        							<View style={styles.date}>
 		        								<Text style={styles.dateNumber}>
 		        									{this.state.selectedDate.format("D")}
@@ -427,34 +424,34 @@ module.exports = React.createClass({
 		switch(mode){
 			case "IN":
 				previousTime = this.state.selectedInTime;
-				this.setState({ selectedInTime: Moment(hour + ":" + minute, "H:m") });
+				this.setState({ selectedInTime: MomentTZ(hour + ":" + minute, "H:m") });
 
-				if(Date.parse('01/01/2011 ' + Moment(this.state.selectedInTime).format("H:m:s")) <= Date.parse('01/01/2011 ' + Moment(this.state.serverTime).format("H:m:s"))){
+				if(Date.parse('01/01/2011 ' + MomentTZ(this.state.selectedInTime).format("H:m:s")) <= Date.parse('01/01/2011 ' + MomentTZ(this.state.serverTime).format("H:m:s"))){
 					this.setState({selectedInTime: previousTime});
 					ToastAndroid.show('Invalid in-time', ToastAndroid.LONG);
 					break;
 				}
-				if((Date.parse('01/01/2011 ' + Moment(hour + ":" + minute, "H:m").format("H:m:s")) >= Date.parse('01/01/2011 ' + Moment(this.state.selectedOutTime).format("H:m:s"))) && Moment(this.state.selectedOutTime).format("H:m") !== "0:0"){
+				if((Date.parse('01/01/2011 ' + MomentTZ(hour + ":" + minute, "H:m").format("H:m") + "0") >= Date.parse('01/01/2011 ' + MomentTZ(this.state.selectedOutTime).format("H:m") + "0")) && MomentTZ(this.state.selectedOutTime).format("H:m") !== "0:0"){
 					ToastAndroid.show('Your in-time should be less than out-time', ToastAndroid.LONG);
 					break;
 				}
 				if(isTimeAdjusted){
-					ToastAndroid.show('Your in-time was adjusted to '+Moment(hour + ":" + minute, "H:m").format("H:mm"), ToastAndroid.LONG);
+					ToastAndroid.show('Your in-time was adjusted to '+MomentTZ(hour + ":" + minute, "H:m").format("H:mm"), ToastAndroid.LONG);
 				}
 				this.loadData();
 				break;
 
 			case "OUT":
 				previousTime = this.state.selectedOutTime;
-				this.setState({ selectedOutTime: Moment(hour + ":" + minute, "H:m") });
+				this.setState({ selectedOutTime: MomentTZ(hour + ":" + minute, "H:m") });
 				
-				if((Date.parse('01/01/2011 ' + Moment(this.state.selectedInTime).format("H:m:s")) >= Date.parse('01/01/2011 ' + Moment(hour + ":" + minute, "H:m").format("H:m:s"))) && hour + ":" + minute !== "0:0"){
+				if((Date.parse('01/01/2011 ' + MomentTZ(this.state.selectedInTime).format("H:m") + "0") >= Date.parse('01/01/2011 ' + MomentTZ(hour + ":" + minute, "H:m").format("H:m") + "0")) && hour + ":" + minute !== "0:0"){
 					ToastAndroid.show('Your in-time should be less than out-time', ToastAndroid.LONG);
 					this.setState({selectedOutTime: previousTime});
 					break;				
 				}
 				if(isTimeAdjusted){
-					ToastAndroid.show('Your out-time was adjusted to '+Moment(hour + ":" + minute, "H:m").format("H:mm"), ToastAndroid.LONG);
+					ToastAndroid.show('Your out-time was adjusted to '+MomentTZ(hour + ":" + minute, "H:m").format("H:mm"), ToastAndroid.LONG);
 				}
 				this.loadData();
 				break;
