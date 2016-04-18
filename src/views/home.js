@@ -27,6 +27,7 @@ var {
 //get libraries
 var Parse = require('parse/react-native').Parse;
 var Moment = require('moment');
+var MomentTZ = require('moment-timezone');
 var TimerMixin = require('react-timer-mixin');
 
 //get components
@@ -38,7 +39,7 @@ var Room = require('../components/room');
 
 //get device dimensions
 const {height, width} = Dimensions.get('window');
-var timeout, timer;
+var timeout, timer, current;
 
 module.exports = React.createClass({
 
@@ -56,46 +57,111 @@ module.exports = React.createClass({
 			isReloadRequired: false,
 			isEnabled: false,
 			isRefreshing: false,
-			serverTime: new Date(),
-			selectedDate: Moment(new Date()),
-			selectedInTime: roundToNextSlot(Moment(new Date())),
-			selectedOutTime: roundToNextSlot(Moment(new Date())).add(30, "minutes"),
-			interactionDisabled: true
+			serverTime: MomentTZ(MomentTZ.tz(new Date(), "Asia/Kolkata")),
+			selectedDate: MomentTZ(new Date()),
+			selectedInTime: roundToNextSlot(MomentTZ(new Date())),
+			selectedOutTime: roundToNextSlot(MomentTZ(new Date())).add(30, "minutes"),
+			interactionDisabled: true,
+			currentAppState: ''
 		}
 	},
 	componentWillMount: function(){
 		this.initEpoch();
 	},
+	componentDidMount: function(){
+		AppState.addEventListener('change', this._handleAppStateChange);
+	},
+	_handleAppStateChange: function(currentAppState) {
+  		this.setState({ currentAppState: currentAppState });
+  		if(this.state.currentAppState === "active"){
+  			this.initEpoch();
+  		}
+	},
 	initEpoch: function(){
 
 		var _this = this;
+		var t0 = performance.now();
+		this.clearInterval(timer);
+		this.setState({ isReloadRequired: false, loaded: false, isEnabled: false, isRefreshing: true, interactionDisabled: true });
 
-		/*** get time from server in local format **//*** get time from server in local format **/
-		/*** get time from server in local format **//*** get time from server in local format **/
+		Parse.Cloud.run('giveNextMeetingSlot', {})
+		.then(
 
-		timer = this.setInterval(function(){
-			_this.setState({ serverTime: new Date(_this.state.serverTime.getTime() + 1000) });
-			if((_this.state.serverTime.getMinutes() === 0 || _this.state.serverTime.getMinutes() === 30) && (_this.state.serverTime.getSeconds() === 0)){
+			function(result){
+
+				//get server time
+				//"Mon Apr 18 2016 17:29:55 GMT+0530 (IST)"
+				var t1 = performance.now();
+				var _serverTime = MomentTZ(MomentTZ.tz(new Date(result), "Asia/Kolkata")); 
+
+				//round in-time to next slot
+				var _selectedInTime = MomentTZ(_serverTime);
+				_selectedInTime = MomentTZ(roundInTime(_selectedInTime));
+				
+				//adjust out time accordingly
+				var _selectedOutTime = MomentTZ(_selectedInTime);
+				_selectedOutTime.add(30, "minutes");
+
+				//inject
 				_this.setState({
-					interactionDisabled: true,
-					selectedDate: Moment(_this.state.serverTime),
-					selectedInTime: roundToNextSlot(Moment(_this.state.serverTime)),
-					selectedOutTime: roundToNextSlot(Moment(_this.state.serverTime).add(30, "minutes")),
+					serverTime: _serverTime,
+					selectedDate: _serverTime,
+					selectedInTime: _selectedInTime,
+					selectedOutTime: _selectedOutTime
 				});
-				_this.loadData();
-			}
-		}, 1000);
 
-		this.loadData();
+				//background timer
+				timer = _this.setInterval(function(){
+
+					var _inTime, _outTime, _minutes;
+
+					// server time++
+					_this.setState({ serverTime: MomentTZ(_this.state.serverTime.add(1, "seconds")) });
+
+					//get minutes
+					_minutes = _this.state.serverTime.minutes();
+
+					//if server time exceeds 30 minutes or hour changes
+					if(( _minutes === 0 || _minutes === 30) && (_this.state.serverTime.seconds() === 0)){
+
+						//round and set in time
+						_inTime = MomentTZ(_this.state.serverTime);
+						_inTime = MomentTZ(roundInTime(_inTime));
+
+						//adjust and set out time
+						_outTime = MomentTZ(_inTime);
+						_outTime.add(30, "minutes");
+
+						//inject
+						_this.setState({
+							interactionDisabled: true,
+							selectedDate: MomentTZ(_this.state.serverTime),
+							selectedInTime: _inTime,
+							selectedOutTime: _outTime
+						});
+
+						//update rooms
+						_this.loadData();
+					}
+				}, 1000);
+
+				//initial update
+				_this.loadData();
+
+			},
+			function(error){
+				console.log("[HOME TIME API] Error: "+ JSON.stringify(error, null, 2));
+			}
+		);
 	},	
 	loadData: function(){
 		
-		clearTimeout(timeout);
+		this.clearTimeout(timeout);
 		var _this = this;
 		this.API();
 
 		//check if data is loaded
-		timeout = setTimeout(function(){
+		timeout = this.setTimeout(function(){
 			if(_this.isMounted()){
 				if(_this.state.loaded===false){
 					_this.setState({
@@ -172,10 +238,11 @@ module.exports = React.createClass({
 	        				<View style={styles.panel} elevation={3}>
 	        					<View style={styles.leftSection}>
 	        						<TouchableHighlight 
-	        							onPress={this.onPressChangeDate.bind(this, { date: new Date(this.state.selectedDate.format("YYYY-MM-DD")), minDate: new Date() })}
+	        							onPress={this.onPressChangeDate.bind(this, { date: new Date(this.state.selectedDate.format("YYYY-MM-DD")), minDate: this.state.serverTime })}
 	        							underlayColor={'#1E88E5'}
 	        						>
 		        						<View style={styles.dateWrapper}>
+		        							<Text>{this.state.serverTime.format("H:m:s")}</Text>
 		        							<View style={styles.date}>
 		        								<Text style={styles.dateNumber}>
 		        									{this.state.selectedDate.format("D")}
@@ -362,7 +429,7 @@ module.exports = React.createClass({
 				previousTime = this.state.selectedInTime;
 				this.setState({ selectedInTime: Moment(hour + ":" + minute, "H:m") });
 
-				if(Date.parse('01/01/2011 ' + Moment(this.state.selectedInTime).format("H:m:s")) <= Date.parse('01/01/2011 ' + Moment().format("H:m:s"))){
+				if(Date.parse('01/01/2011 ' + Moment(this.state.selectedInTime).format("H:m:s")) <= Date.parse('01/01/2011 ' + Moment(this.state.serverTime).format("H:m:s"))){
 					this.setState({selectedInTime: previousTime});
 					ToastAndroid.show('Invalid in-time', ToastAndroid.LONG);
 					break;
@@ -436,9 +503,19 @@ module.exports = React.createClass({
 	},
 });
 
+function roundInTime(time){
+	if(time.minutes()>0 && time.minutes()<30){
+		time.minutes(30);
+	}
+	else{
+		time.minutes(0).add(1, "hours");
+	}
+	return time;
+}
+
 function roundToNextSlot(start){
 	var ROUNDING = 30 * 60 * 1000; /*ms*/
-	start = Moment(Math.ceil((+start) / ROUNDING) * ROUNDING);
+	start = MomentTZ(Math.ceil((+start) / ROUNDING) * ROUNDING);
 	return start;
 }
 

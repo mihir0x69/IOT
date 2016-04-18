@@ -156,7 +156,6 @@ module.exports = React.createClass({
 		});
 		this.setTimeout(function(){
 			if(_this.state.interactionDisabled === true){
-				_this.clearInterval(interval);
 				_this.setState({
 					message: 'Something went wrong. Please try again.',
 					messageColor: '#e53935',

@@ -165,7 +165,6 @@ module.exports = React.createClass({
 		});
 		this.setTimeout(function(){
 			if(_this.state.interactionDisabled === true){
-				_this.clearInterval(interval);
 				if(_this.isMounted()){
 					_this.setState({
 						currentPhrase: 'Something went wrong. Please try again.',

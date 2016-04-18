@@ -7,10 +7,13 @@ var {
 	View
 } = React;
 
+var TimerMixin = require('react-timer-mixin');
+
 module.exports = React.createClass({
 
+	mixins: [TimerMixin],
 	componentDidMount: function(){
-		setTimeout(() =>{
+		this.setTimeout(() =>{
 			this.props.navigator.replace({name: 'signin'});
 		}, 2000);
 	},
