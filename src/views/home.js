@@ -57,10 +57,10 @@ module.exports = React.createClass({
 			isReloadRequired: false,
 			isEnabled: false,
 			isRefreshing: false,
-			serverTime: MomentTZ(MomentTZ.tz(new Date(), "Asia/Kolkata")),
+			serverTime: MomentTZ(),
 			selectedDate: MomentTZ(),
-			selectedInTime: roundToNextSlot(MomentTZ()),
-			selectedOutTime: roundToNextSlot(MomentTZ()).add(30, "minutes"),
+			selectedInTime: MomentTZ(),
+			selectedOutTime: MomentTZ().add(30, "minutes"),
 			interactionDisabled: true,
 			currentAppState: ''
 		}
@@ -92,18 +92,27 @@ module.exports = React.createClass({
 				//var _serverTime = MomentTZ(MomentTZ.tz(new Date("Mon Apr 18 2016 22:59:40 GMT+0530 (IST)"), "Asia/Kolkata")); 
 				var _serverTime = MomentTZ(MomentTZ.tz(new Date(result), "Asia/Kolkata")); 
 
+				//round in-time to next slot
+				var _selectedInTime = MomentTZ(_serverTime);
+				_selectedInTime = MomentTZ(roundInTime(_selectedInTime));
+				
+				//adjust out time accordingly
+				var _selectedOutTime = MomentTZ(_selectedInTime);
+				_selectedOutTime.add(30, "minutes");
+
+
 				//inject
 				_this.setState({
 					serverTime: _serverTime,
 					selectedDate: _serverTime,
-					selectedInTime: roundToNextSlot(_serverTime),
-					selectedOutTime: roundToNextSlot(_serverTime).add(30, "minutes")
+					selectedInTime: _selectedInTime,
+					selectedOutTime: _selectedOutTime
 				});
 
 				//background timer
 				timer = _this.setInterval(function(){
 
-					var _minutes;
+					var _inTime, _outTime, _minutes;
 
 					// server time++
 					_this.setState({ serverTime: MomentTZ(_this.state.serverTime.add(1, "seconds")) });
@@ -114,12 +123,20 @@ module.exports = React.createClass({
 					//if server time exceeds 30 minutes or hour changes
 					if(( _minutes === 0 || _minutes === 30) && (_this.state.serverTime.seconds() === 0)){
 
+						//round and set in time
+						_inTime = MomentTZ(_this.state.serverTime);
+						_inTime = MomentTZ(roundInTime(_inTime));
+
+						//adjust and set out time
+						_outTime = MomentTZ(_inTime);
+						_outTime.add(30, "minutes");
+
 						//inject
 						_this.setState({
 							interactionDisabled: true,
 							selectedDate: MomentTZ(_this.state.serverTime),
-							selectedInTime: roundToNextSlot(_this.state.serverTime),
-							selectedOutTime: roundToNextSlot(_this.state.serverTime).add(30, "minutes")
+							selectedInTime: _inTime,
+							selectedOutTime: _outTime
 						});
 
 						//update rooms
@@ -220,7 +237,7 @@ module.exports = React.createClass({
 	        				<View style={styles.panel} elevation={3}>
 	        					<View style={styles.leftSection}>
 	        						<TouchableHighlight 
-	        							onPress={this.onPressChangeDate.bind(this, { date: new Date(this.state.selectedDate.format("YYYY-MM-DD")), minDate: this.state.serverTime })}
+	        							onPress={this.onPressChangeDate.bind(this, { date: new Date(this.state.selectedDate.format("YYYY-MM-DD")), minDate: this.state.serverTime.toDate() })}
 	        							underlayColor={'#1E88E5'}
 	        						>
 		        						<View style={styles.dateWrapper}>
@@ -483,6 +500,16 @@ module.exports = React.createClass({
 		return parseInt(time.substr(time.indexOf(":") + 1));
 	},
 });
+
+function roundInTime(time){
+	if(time.minutes()>0 && time.minutes()<30){
+		time.minutes(30);
+	}
+	else{
+		time.minutes(0).add(1, "hours");
+	}
+	return time;
+}
 
 function roundToNextSlot(start){
 	var ROUNDING = 30 * 60 * 1000; /*ms*/
