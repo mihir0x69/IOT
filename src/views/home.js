@@ -241,7 +241,6 @@ module.exports = React.createClass({
 	        						</TouchableHighlight>
 	        					</View>
 	        					<View style={styles.rightSection}>
-	        						<Text>{this.state.serverTime.format("HH:mm:ss")}</Text>
 	        						<View style={[styles.stackItems, {padding: 10}]}>
 	        							<View style={{flexDirection: 'row'}}>
     										<Text style={styles.dayText}>In-Out Time </Text>
@@ -411,7 +410,7 @@ module.exports = React.createClass({
 				previousTime = this.state.selectedInTime;
 				this.setState({ selectedInTime: MomentTZ(hour + ":" + minute, "H:m") });
 
-				if(Date.parse('01/01/2011 ' + MomentTZ(this.state.selectedInTime).format("H:m:s")) <= Date.parse('01/01/2011 ' + MomentTZ(this.state.serverTime).format("H:m:s"))){
+				if(Date.parse('01/01/2011 ' + MomentTZ(this.state.selectedInTime).format("H:m") + ":0") <= Date.parse('01/01/2011 ' + MomentTZ(this.state.serverTime).format("H:m") + ":0")){
 					this.setState({selectedInTime: previousTime});
 					ToastAndroid.show('Invalid in-time', ToastAndroid.LONG);
 					break;
@@ -430,7 +429,7 @@ module.exports = React.createClass({
 				previousTime = this.state.selectedOutTime;
 				this.setState({ selectedOutTime: MomentTZ(hour + ":" + minute, "H:m") });
 				
-				if((Date.parse('01/01/2011 ' + MomentTZ(this.state.selectedInTime).format("H:m") + "0") >= Date.parse('01/01/2011 ' + MomentTZ(hour + ":" + minute, "H:m").format("H:m") + "0")) && hour + ":" + minute !== "0:0"){
+				if((Date.parse('01/01/2011 ' + MomentTZ(this.state.selectedInTime).format("H:m") + ":0") >= Date.parse('01/01/2011 ' + MomentTZ(hour + ":" + minute, "H:m").format("H:m") + ":0")) && hour + ":" + minute !== "0:0"){
 					ToastAndroid.show('Your in-time should be less than out-time', ToastAndroid.LONG);
 					this.setState({selectedOutTime: previousTime});
 					break;				
@@ -484,16 +483,6 @@ module.exports = React.createClass({
 		return parseInt(time.substr(time.indexOf(":") + 1));
 	},
 });
-
-function roundInTime(time){
-	if(time.minutes()>0 && time.minutes()<30){
-		time.minutes(30);
-	}
-	else{
-		time.minutes(0).add(1, "hours");
-	}
-	return time;
-}
 
 function roundToNextSlot(start){
 	var ROUNDING = 30 * 60 * 1000; /*ms*/
