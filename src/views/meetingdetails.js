@@ -1,22 +1,21 @@
 'use strict';
 var React = require('react-native');
 var {
+    TouchableHighlight,
+    AsyncStorage,
+    ToastAndroid,
+    ScrollView,
 	StyleSheet,
-	ScrollView,
 	View,
 	Text
 } = React;
 
 //get libraries
+var Parse = require('parse/react-native').Parse;
 var Moment = require('moment');
 
 //get components
 var ToolbarAfterLoad = require('../components/toolbarAfterLoad');
-
-// var _date = Moment(this.props.item.book_date + this.props.item.book_fromtime, "D-M-YYYY H.m").add(Moment().utcOffset(), "minutes").format("MMMM Do YYYY");
-// var _inTime = Moment(this.props.item.book_date + this.props.item.book_fromtime, "D-M-YYYY H.m").add(Moment().utcOffset(), "minutes").format("H:mm");
-// var _outTime = Moment(this.props.item.book_date + this.props.item.book_totime, "D-M-YYYY H.m").add(Moment().utcOffset(), "minutes").format("H:mm");
-
 
 module.exports = React.createClass({
 	render: function(){
@@ -41,23 +40,23 @@ module.exports = React.createClass({
     								<Text style={styles.bold}>Room Name</Text>
     							</View>
     							<View style={styles.info}>
-    								<Text>{this.props.data.room_name}</Text>
-    							</View>
-    						</View>    					
-    						<View style={styles.detailWrapper}>
-    							<View style={styles.heading}>
-    								<Text style={styles.bold}>Booking Date</Text>
-    							</View>
-    							<View style={styles.info}>
-    								<Text>{Moment(this.props.data.book_date + " " + this.props.data.book_fromtime.toFixed(2), "D-M-YYYY H.m").add(Moment().utcOffset(), "minutes").format("MMMM Do YYYY")}</Text>
+    								<Text style={styles.infoText}>{this.props.data.room_name}</Text>
     							</View>
     						</View>
+                            <View style={styles.detailWrapper}>
+                                <View style={styles.heading}>
+                                    <Text style={styles.bold}>Booking Date</Text>
+                                </View>
+                                <View style={styles.info}>
+                                    <Text style={styles.infoText}>{Moment(this.props.data.book_date + " " + this.props.data.book_fromtime.toFixed(2), "D-M-YYYY H.m").add(Moment().utcOffset(), "minutes").format("dddd, MMMM Do YYYY")}</Text>
+                                </View>
+                            </View>                            
     						<View style={styles.detailWrapper}>
     							<View style={styles.heading}>
     								<Text style={styles.bold}>In Time</Text>
     							</View>
     							<View style={styles.info}>
-    								<Text>{Moment(this.props.data.book_date + " " + this.props.data.book_fromtime.toFixed(2), "D-M-YYYY H.m").add(Moment().utcOffset(), "minutes").format("H:mm")}</Text>
+    								<Text style={styles.infoText}>{Moment(this.props.data.book_date + " " + this.props.data.book_fromtime.toFixed(2), "D-M-YYYY H.m").add(Moment().utcOffset(), "minutes").format("H:mm")}</Text>
     							</View>
     						</View>
     						<View style={styles.detailWrapper}>
@@ -65,7 +64,7 @@ module.exports = React.createClass({
     								<Text style={styles.bold}>Out Time</Text>
     							</View>
     							<View style={styles.info}>
-    								<Text>{Moment(this.props.data.book_date + " " + this.props.data.book_totime.toFixed(2), "D-M-YYYY H.m").add(Moment().utcOffset(), "minutes").format("H:mm")}</Text>
+    								<Text style={styles.infoText}>{Moment(this.props.data.book_date + " " + this.props.data.book_totime.toFixed(2), "D-M-YYYY H.m").add(Moment().utcOffset(), "minutes").format("H:mm")}</Text>
     							</View>
     						</View>
     						<View style={styles.detailWrapper}>
@@ -73,15 +72,56 @@ module.exports = React.createClass({
     								<Text style={styles.bold}>Status</Text>
     							</View>
     							<View style={styles.info}>
-    								<Text>{statusToString(this.props.data.status_id)}</Text>
+    								<Text style={styles.infoText}>{statusToString(this.props.data.status_id)}</Text>
     							</View>
     						</View>    						
     					</View>
+                        <View style={[styles.container, {alignItems: 'flex-end', marginTop: 10}]}>
+                            {this.renderCancelButton(this.props.data.status_id)}
+                        </View>
     				</View>
     			</ScrollView>
   			</View>
   		);
-	}
+	},
+    renderCancelButton: function(id){
+        if(id===1){
+            return(
+                <TouchableHighlight underlayColor={'#f5f5f5'} onPress={this.onPressCancel}>
+                    <View style={{paddingTop: 5, paddingRight: 10, paddingBottom: 5, paddingLeft: 10}}>
+                        <Text style={{color: '#f44336'}}>CANCEL MEETING</Text>
+                    </View>
+                </TouchableHighlight>
+            )
+        }
+        return(
+            <TouchableHighlight underlayColor={'#f5f5f5'} onPress={this.onPressDeny}>
+                <View style={{paddingTop: 5, paddingRight: 10, paddingBottom: 5, paddingLeft: 10}}>
+                    <Text style={{color: '#f44336'}}>CANCEL MEETING</Text>
+                </View>
+            </TouchableHighlight>
+        )
+    },
+    onPressCancel: function(){
+        var _this = this;
+        Parse.Cloud.run('deleteMyBooking', {
+            objectid: _this.props.data.objectId
+        }).then(
+
+            async function(result){
+
+                await AsyncStorage.removeItem('FORCE_UPDATE');
+                await AsyncStorage.setItem('FORCE_UPDATE', JSON.stringify(true));
+                ToastAndroid.show("The meeting has been cancelled.", ToastAndroid.LONG);
+            },
+            function(error){
+                ToastAndroid.show("Something went wrong. Please try later.", ToastAndroid.LONG);
+            }
+        );
+    },
+    onPressDeny: function(){
+        ToastAndroid.show("You cannot cancel past meetings.", ToastAndroid.LONG);
+    }
 });
 
 function statusToString(id){
@@ -104,8 +144,9 @@ const styles = StyleSheet.create({
 		backgroundColor: '#ffffff'
 	},	
 	title: {
-		fontSize: 22,
-		fontWeight: 'bold'
+		fontSize: 28,
+        color: '#000000',
+        marginBottom: 5
 	},
 	description: {
 		marginTop: 2,
@@ -124,6 +165,8 @@ const styles = StyleSheet.create({
 	info: {
 		flex: 2
 	},
+    infoText: {
+    },
 	bold: {
 		fontWeight: 'bold'
 	}

@@ -41,12 +41,41 @@ module.exports = React.createClass({
 						<Text style={styles.title}>{this.props.item.title}</Text>
 						<Text style={styles.timestamp}>{Moment(this.props.item.book_date + " " + this.props.item.book_fromtime.toFixed(2), "D-M-YYYY H.m").add(Moment().utcOffset(), "minutes").format("MMMM Do YYYY")}</Text>
 					</View>
+					{this.statusToString(this.props.item.status_id)}
 				</View>
 			</TouchableHighlight>
 		);
 	},
 	onPressMeetingItem: function(){
 		this.props.navigator.push({name: 'meetingdetails', data: this.props.item});
+	},
+	statusToString: function(id){
+		var accent;
+		switch(id){
+			case 1: id="Booked";
+					accent="2196F3";
+					break;
+			case 2: id="Ongoing";
+					accent="4CAF50"
+					break;
+			case 4: id="Cancelled";
+					accent="FF5722"
+					break;
+			case 5: id="Completed";
+					accent="607D8B"
+					break;
+			default:id="Unknown"
+					accent="9E9E9E"
+					break;
+
+		}
+		return(
+			<View>
+				<View style={[styles.status, {borderColor: '#'+accent, }]}>
+					<Text style={{color: '#'+accent}}>{id}</Text>
+				</View>
+			</View>
+		)		
 	}
 });
 
@@ -84,5 +113,13 @@ const styles = StyleSheet.create({
 	alphabet: {
 		fontSize: 22,
 		color: '#ffffff'
+	},
+	status: {
+		borderWidth: 1,
+		borderRadius: 3, 
+		paddingTop: 1, 
+		paddingRight: 5, 
+		paddingBottom: 2, 
+		paddingLeft: 5
 	}
 });
