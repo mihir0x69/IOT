@@ -47,7 +47,7 @@ module.exports = React.createClass({
 		);
 	},
 	onPressMeetingItem: function(){
-		this.props.navigator.push({name: 'meetingdetails', data: this.props.item});
+		this.props.navigator.push({name: 'meetingdetails', data: this.props.item, params: {loadData: this.props.data.loadData, refreshList: this.props.data.refreshList}});
 	},
 	statusToString: function(id){
 		var accent;

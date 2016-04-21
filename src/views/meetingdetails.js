@@ -2,7 +2,7 @@
 var React = require('react-native');
 var {
     TouchableHighlight,
-    AsyncStorage,
+    ProgressBarAndroid,
     ToastAndroid,
     ScrollView,
 	StyleSheet,
@@ -18,6 +18,11 @@ var Moment = require('moment');
 var ToolbarAfterLoad = require('../components/toolbarAfterLoad');
 
 module.exports = React.createClass({
+    getInitialState: function(){
+        return{
+            disableSubmit: false
+        }
+    },
 	render: function(){
 		return(
     		<View style={styles.container}>
@@ -90,38 +95,47 @@ module.exports = React.createClass({
                 <TouchableHighlight underlayColor={'#f5f5f5'} onPress={this.onPressCancel}>
                     <View style={{paddingTop: 5, paddingRight: 10, paddingBottom: 5, paddingLeft: 10}}>
                         <Text style={{color: '#f44336'}}>CANCEL MEETING</Text>
+                        {this.state.disableSubmit ? this.renderProgressBar() : this.renderBlank() }
                     </View>
                 </TouchableHighlight>
             )
         }
         return(
-            <TouchableHighlight underlayColor={'#f5f5f5'} onPress={this.onPressDeny}>
+            <TouchableHighlight underlayColor={'#f5f5f5'} onPress={this.onPressDeny.bind(this, statusToString(id))}>
                 <View style={{paddingTop: 5, paddingRight: 10, paddingBottom: 5, paddingLeft: 10}}>
-                    <Text style={{color: '#f44336'}}>CANCEL MEETING</Text>
+                    <Text style={{color: '#cccccc'}}>CANCEL MEETING</Text>
                 </View>
             </TouchableHighlight>
         )
     },
     onPressCancel: function(){
         var _this = this;
+        this.setState({ disableSubmit: true })
         Parse.Cloud.run('deleteMyBooking', {
             objectid: _this.props.data.objectId
         }).then(
 
-            async function(result){
+            function(result){
 
-                await AsyncStorage.removeItem('FORCE_UPDATE');
-                await AsyncStorage.setItem('FORCE_UPDATE', JSON.stringify(true));
-                ToastAndroid.show("The meeting has been cancelled.", ToastAndroid.LONG);
+                // await AsyncStorage.removeItem('FORCE_UPDATE');
+                // await AsyncStorage.setItem('FORCE_UPDATE', JSON.stringify(true));
+                _this.props.navigator.replace({name: 'cancelsuccess', data: _this.props.params});
             },
             function(error){
+                _this.setState({ disableSubmit: false })
                 ToastAndroid.show("Something went wrong. Please try later.", ToastAndroid.LONG);
             }
         );
     },
-    onPressDeny: function(){
-        ToastAndroid.show("You cannot cancel past meetings.", ToastAndroid.LONG);
-    }
+    onPressDeny: function(id){
+        ToastAndroid.show(id+" meeting cannot be cancelled.", ToastAndroid.LONG);
+    },
+    renderProgressBar: function(){
+        return <ProgressBarAndroid color={'#f44336'} styleAttr="Horizontal" />
+    },
+    renderBlank: function(){
+        return <View></View>
+    }    
 });
 
 function statusToString(id){

@@ -23,6 +23,7 @@ var Home = require('./views/home');
 var NewBooking = require('./views/newbooking');
 var Success = require('./views/success');
 var Failure = require('./views/failure');
+var CancelSuccess = require('./views/cancelsuccess');
 var About = require('./views/about');
 var ReservationList = require('./views/reservationlist');
 var MeetingDetails = require('./views/meetingdetails');
@@ -38,7 +39,8 @@ var ROUTES = {
 	failure: Failure,
 	about: About,
 	reservationlist: ReservationList,
-	meetingdetails: MeetingDetails
+	meetingdetails: MeetingDetails,
+	cancelsuccess: CancelSuccess
 };
 
 var _navigator, _route;

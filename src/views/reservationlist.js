@@ -201,7 +201,7 @@ module.exports = React.createClass({
 		return <LoadingView />
 	},
 	renderReservation: function(item){
-		return <MeetingItem item={item} navigator={this.props.navigator} />
+		return <MeetingItem item={item} navigator={this.props.navigator} data={{loadData: this.props.data, refreshList: this.loadData}} />
 	},
 });
 

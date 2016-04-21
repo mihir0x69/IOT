@@ -16,20 +16,22 @@ module.exports = React.createClass({
 	render: function(){
 		return(
 			<View style={styles.container}>
-				<Icon name="delete-sweep" size={100} color="#ef5350" style={{marginBottom: 25}} />
-				<Text style={{fontWeight: 'bold'}}>OOPS!</Text>
-				<Text>Booking has been cancelled successfully</Text>
+				<Icon name="delete" size={100} color="#cccccc" style={{marginBottom: 25}} />
+				<Text style={{fontWeight: 'bold'}}>SUCCESS</Text>
+				<Text>Your booking has been cancelled.</Text>
 				<TouchableHighlight underlayColor={'#e8e8e8'} onPress={this.onDismiss}>
-					<Text style={{fontSize: 15, color: '#4FC3F7', marginTop: 20}}>Back to Dashboard</Text>
+					<Text style={{fontSize: 15, color: '#4FC3F7', marginTop: 20}}>Tap to continue</Text>
 				</TouchableHighlight>
 			</View>
 		);
 	},
 	onDismiss: function(){
-		this.props.data.loadData("API");
+		this.props.data.loadData();
+		this.props.data.refreshList("API");
 		this.props.navigator.pop();
 	}
-})
+});
+
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,

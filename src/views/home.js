@@ -193,7 +193,7 @@ module.exports = React.createClass({
 				//Convert ParseObject to JSON; then push into an array.
 				var cleanData = [];
 				for(var i=0;i<result.length;i++){
-					if(result[i].toJSON().room_name !== undefined){
+					if(result[i].toJSON().room_name !== undefined && result[i].toJSON().room_name !== ""){
 						cleanData.push(result[i].toJSON());
 					}
 				}
@@ -390,7 +390,7 @@ module.exports = React.createClass({
 		}
 		var dateString = year + "-" + ((month+1)<10 ? "0"+(month+1) : month+1) + "-" + (day < 10 ? "0"+day : day);
 		var date = new Date(dateString);
-		this.setState({ selectedDate: Moment(date) });
+		this.setState({ selectedDate: MomentTZ(date) });
 		this.loadData();
 	},
 	onPressChangeInOutTime: async function(mode, options){
@@ -427,15 +427,19 @@ module.exports = React.createClass({
 				previousTime = this.state.selectedInTime;
 				this.setState({ selectedInTime: MomentTZ(hour + ":" + minute, "H:m") });
 
-				if(Date.parse('01/01/2011 ' + MomentTZ(this.state.selectedInTime).format("H:m") + ":0") <= Date.parse('01/01/2011 ' + MomentTZ(this.state.serverTime).format("H:m") + ":0")){
-					this.setState({selectedInTime: previousTime});
-					ToastAndroid.show('Invalid in-time', ToastAndroid.LONG);
-					break;
+				if(!(MomentTZ(this.state.serverDate).isBefore(MomentTZ(this.state.selectedDate)))){
+					if(Date.parse('01/01/2011 ' + MomentTZ(this.state.selectedInTime).format("H:m") + ":0") <= Date.parse('01/01/2011 ' + MomentTZ(this.state.serverTime).format("H:m") + ":0")){
+						this.setState({selectedInTime: previousTime});
+						ToastAndroid.show('Invalid in-time', ToastAndroid.LONG);
+						break;
+					}
 				}
-				if((Date.parse('01/01/2011 ' + MomentTZ(hour + ":" + minute, "H:m").format("H:m") + "0") >= Date.parse('01/01/2011 ' + MomentTZ(this.state.selectedOutTime).format("H:m") + "0")) && MomentTZ(this.state.selectedOutTime).format("H:m") !== "0:0"){
-					ToastAndroid.show('Your in-time should be less than out-time', ToastAndroid.LONG);
-					break;
-				}
+
+				this.setState({ selectedOutTime: MomentTZ(MomentTZ(hour + ":" + minute, "H:m").add(30, "minutes"))})
+				// if((Date.parse('01/01/2011 ' + MomentTZ(hour + ":" + minute, "H:m").format("H:m") + "0") >= Date.parse('01/01/2011 ' + MomentTZ(this.state.selectedOutTime).format("H:m") + "0")) && MomentTZ(this.state.selectedOutTime).format("H:m") !== "0:0"){
+				// 	ToastAndroid.show('Your in-time should be less than out-time', ToastAndroid.LONG);
+				// 	break;
+				// }
 				if(isTimeAdjusted){
 					ToastAndroid.show('Your in-time was adjusted to '+MomentTZ(hour + ":" + minute, "H:m").format("H:mm"), ToastAndroid.LONG);
 				}
@@ -470,7 +474,7 @@ module.exports = React.createClass({
 	},	
 	onPressReservationList: function(){
 		this.refs['DRAWER'].closeDrawer();
-		this.props.navigator.push({ name: 'reservationlist' });
+		this.props.navigator.push({ name: 'reservationlist', data: this.loadData });
 	},
 	onPressAboutApp: function(){
 		this.refs['DRAWER'].closeDrawer();
