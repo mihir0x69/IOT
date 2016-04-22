@@ -90,5 +90,5 @@ const styles = StyleSheet.create({
 		alignSelf: 'stretch',
     	width: null,
     	position: 'relative'
-	},	
+	}
 })

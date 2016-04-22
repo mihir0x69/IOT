@@ -9,7 +9,6 @@ var {
 	Text
 } = React;
 
-var ToolbarBeforeLoad = require('./toolbarBeforeLoad');
 var Icon = require('react-native-vector-icons/MaterialIcons');
 
 var {height, width} = Dimensions.get('window');

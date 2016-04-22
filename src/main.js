@@ -9,7 +9,6 @@ var {
 	Navigator,
 	Alert,
 	View,
-	Text
 } = React;
 
 //Get Parse from modules

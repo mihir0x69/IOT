@@ -19,6 +19,7 @@ var TimerMixin = require('react-timer-mixin');
 //get components
 var Button = require('../components/button');
 
+//timer
 var interval;
 
 
@@ -98,7 +99,7 @@ module.exports = React.createClass({
 			});
 		}
 		if(this.isMounted()){
-			this.setState({ currentPhrase: 'Loading...', phraseColor: '#ffffff', interactionDisabled: true });
+			this.setState({ currentPhrase: 'Signing in...', phraseColor: '#ffffff', interactionDisabled: true });
 		}
 		this.setRandomMessage();
 
@@ -163,6 +164,7 @@ module.exports = React.createClass({
 				}
 			}
 		});
+		
 		this.setTimeout(function(){
 			if(_this.state.interactionDisabled === true){
 				if(_this.isMounted()){

@@ -4,19 +4,16 @@ var React = require('react-native');
 var {
   	DrawerLayoutAndroid,
   	TouchableHighlight,
-  	InteractionManager,
   	TimePickerAndroid,
   	DatePickerAndroid,
   	RefreshControl,
   	AsyncStorage,
   	ToastAndroid,
-  	BackAndroid,
   	ScrollView,
   	StyleSheet,
   	Dimensions,
   	TextInput,
   	ListView,
-  	Platform,
   	AppState,
   	Alert,
   	Image,
@@ -26,7 +23,6 @@ var {
 
 //get libraries
 var Parse = require('parse/react-native').Parse;
-var Moment = require('moment');
 var MomentTZ = require('moment-timezone');
 var TimerMixin = require('react-timer-mixin');
 
@@ -45,9 +41,6 @@ module.exports = React.createClass({
 
 	mixins: [TimerMixin],
 	getInitialState: function(){
-
-		/**replace new Date() with timestring from the server *//**replace new Date() with timestring from the server */
-		/**replace new Date() with timestring from the server *//**replace new Date() with timestring from the server */
 		return{
 			rawData: [],
 			dataSource: new ListView.DataSource({
@@ -79,8 +72,10 @@ module.exports = React.createClass({
 	},
 	initEpoch: function(){
 
-		var _this = this;
+		//clear previous background timer
 		this.clearInterval(timer);
+
+		var _this = this;
 		this.setState({ isReloadRequired: false, loaded: false, isEnabled: false, isRefreshing: true, interactionDisabled: true });
 
 		Parse.Cloud.run('giveNextMeetingSlot', {})
@@ -108,6 +103,9 @@ module.exports = React.createClass({
 					selectedInTime: _selectedInTime,
 					selectedOutTime: _selectedOutTime
 				});
+
+				//initial load
+				_this.loadData();
 
 				//background timer
 				timer = _this.setInterval(function(){
@@ -143,13 +141,9 @@ module.exports = React.createClass({
 						_this.loadData();
 					}
 				}, 1000);
-
-				//initial update
-				_this.loadData();
-
 			},
 			function(error){
-				console.log("[HOME TIME API] Error: "+ JSON.stringify(error, null, 2));
+				console.warn("[HOME TIME API] Error: "+ JSON.stringify(error, null, 2));
 			}
 		);
 	},	
@@ -176,9 +170,9 @@ module.exports = React.createClass({
 
 		var _this = this;
 
-		var _bookFromTime = parseFloat(Moment(this.state.selectedInTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.m"));
-		var _bookToTime = parseFloat(Moment(this.state.selectedOutTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.m"));
-		var _bookDate = Moment(Moment(this.state.selectedDate).format("D-M-YYYY") + " " + Moment(this.state.selectedInTime, "H:m").format("H.m"), "D-M-YYYY H:m").subtract(Moment().utcOffset(), "minutes").format("D-M-YYYY");
+		var _bookFromTime = parseFloat(MomentTZ(this.state.selectedInTime, "H:m").subtract(MomentTZ().utcOffset(), "minutes").format("H.m"));
+		var _bookToTime = parseFloat(MomentTZ(this.state.selectedOutTime, "H:m").subtract(MomentTZ().utcOffset(), "minutes").format("H.m"));
+		var _bookDate = MomentTZ(MomentTZ(this.state.selectedDate).format("D-M-YYYY") + " " + MomentTZ(this.state.selectedInTime, "H:m").format("H.m"), "D-M-YYYY H:m").subtract(MomentTZ().utcOffset(), "minutes").format("D-M-YYYY");
 
 		this.setState({ isReloadRequired: false, loaded: false, isEnabled: false, isRefreshing: true });
 
@@ -295,7 +289,7 @@ module.exports = React.createClass({
 									<RefreshControl 
 				                		refreshing={this.state.isRefreshing}
 				                		onRefresh={this.loadData}
-				                		colors={['#2196F3', '#E91E63', '#FBC02D', '#607D8B']}
+				                		colors={['#2196F3', '#E91E63', '#FBC02D', '#7B1FA2', '#607D8B', '#29B6F6', '#CDDC39']}
 									/>
 				            	}
 		            			contentContainerStyle={styles.container}
@@ -380,6 +374,7 @@ module.exports = React.createClass({
 	    );
 	},
 	onPressChangeDate: async function(options){
+		var _selectedInTime, _selectedOutTime;
 		if(this.state.interactionDisabled){
 			ToastAndroid.show('Please wait. Adjusting to the local time.', ToastAndroid.LONG);
 			return;
@@ -391,6 +386,24 @@ module.exports = React.createClass({
 		var dateString = year + "-" + ((month+1)<10 ? "0"+(month+1) : month+1) + "-" + (day < 10 ? "0"+day : day);
 		var date = new Date(dateString);
 		this.setState({ selectedDate: MomentTZ(date) });
+
+		//prevent backdoor changes
+		if((MomentTZ(MomentTZ(this.state.serverDate).format("YYYY MM DD"), "YYYY MM DD").isSame(MomentTZ(MomentTZ(this.state.selectedDate).format("YYYY MM DD"), "YYYY MM DD")))){
+			//round in-time to next slot
+			_selectedInTime = MomentTZ(this.state.serverTime);
+			_selectedInTime = MomentTZ(roundInTime(_selectedInTime));
+			
+			//adjust out time accordingly
+			_selectedOutTime = MomentTZ(_selectedInTime);
+			_selectedOutTime.add(30, "minutes");
+
+			this.setState({
+				selectedInTime: _selectedInTime,
+				selectedOutTime: _selectedOutTime
+			})
+		}
+
+		//refresh rooms
 		this.loadData();
 	},
 	onPressChangeInOutTime: async function(mode, options){
@@ -536,20 +549,11 @@ const styles = StyleSheet.create({
 		padding: 16,
 		backgroundColor: '#eeeeee'
 	},
-	hint: {
-		fontSize: 15,
-		color: '#0288D1',
-	},
 	canvas: {
 		flex: 1,
 		alignSelf: 'stretch',
     	width: null,
     	position: 'relative'
-	},
-	roomListTitle: { 
-		padding: 15, 
-		borderBottomColor: '#e8e8e8', 
-		borderBottomWidth: 1
 	},
 	sidebarHeader: {
 		flex: 1,
@@ -594,11 +598,6 @@ const styles = StyleSheet.create({
 		fontSize: 15,
 		color: '#ffffff'
 	},
-	helpText: {
-		fontSize: 12,
-		color: '#ffffff',
-		margin: 2
-	},
 	dateNumber: {
 		fontSize: 30,
 		color: '#2196F3'
@@ -632,5 +631,3 @@ const styles = StyleSheet.create({
 		backgroundColor: '#ffffff',
 	}
 });
-
-//<Text>{Moment(this.state.selectedInTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.m") + " " + Moment(this.state.selectedOutTime, "H:m").subtract(Moment().utcOffset(), "minutes").format("H.m")}</Text>

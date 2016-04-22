@@ -7,14 +7,13 @@ var {
   	TouchableHighlight,
   	RefreshControl,
 	AsyncStorage,
-	Dimensions,
   	ScrollView,
   	StyleSheet,
   	Dimensions,
   	ListView,
   	Image,
+  	View,
   	Text,
-  	View
 } = React;
 
 //get libraries
@@ -42,8 +41,7 @@ module.exports = React.createClass({
 			loaded: false,
 			isReloadRequired: false,
 			isRefreshing: false,
-			isEnabled: false,
-			cache: ''
+			isEnabled: false
 		}
 	},
 	componentWillMount: async function(){
@@ -150,7 +148,7 @@ module.exports = React.createClass({
 	        					refreshing={this.state.isRefreshing}
 	        					onRefresh={this.loadData.bind(this, 'API')}
 	        					enabled={this.state.isEnabled}
-	        					colors={['#2196F3', '#E91E63', '#FBC02D', '#607D8B']}
+	        					colors={['#2196F3', '#E91E63', '#FBC02D', '#607D8B', '#29B6F6', '#CDDC39']}
 							/>
 						}
       				>
@@ -168,7 +166,7 @@ module.exports = React.createClass({
 			      			<View style={styles.noRecordsFoundScene}>
 			      				<View style={styles.centerWeighted}>
 			      					<Icon name="error" size={100} color="#cccccc" />
-			      					<Text style={styles.errorMessageReload}>You have no meetings.</Text>
+			      					<Text style={styles.errorMessageReload}>You have no reservations, yet.</Text>
 			      					<Text>Tap to book.</Text>
 			      				</View>
 							</View>
