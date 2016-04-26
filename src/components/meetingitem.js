@@ -38,7 +38,7 @@ module.exports = React.createClass({
 						</View>
 					</View>
 					<View style={styles.titleWrapper}>
-						<Text style={styles.title}>{this.props.item.title}</Text>
+						<Text style={styles.title}>{adjustTitle(this.props.item.title)}</Text>
 						<Text style={styles.timestamp}>{Moment(this.props.item.book_date + " " + this.props.item.book_fromtime.toFixed(2), "D-M-YYYY H.m").add(Moment().utcOffset(), "minutes").format("MMMM Do YYYY")}</Text>
 					</View>
 					{this.statusToString(this.props.item.status_id)}
@@ -80,6 +80,7 @@ module.exports = React.createClass({
 });
 
 function titleCase(string) { return string.toUpperCase(); }
+function adjustTitle(string) { return string.length > 22 ? string.substring(0, 20) + "..." : string }
 
 const styles = StyleSheet.create({
 	wrapper: {
@@ -101,7 +102,8 @@ const styles = StyleSheet.create({
 		flex: 1
 	},
 	titleWrapper: {
-		flex: 4
+		flex: 4,
+		paddingLeft: 10
 	},
 	circle: {
 		width: 45,

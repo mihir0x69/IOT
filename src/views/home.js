@@ -47,6 +47,7 @@ module.exports = React.createClass({
           		rowHasChanged: (row1, row2) => row1 !== row2
         	}),
 			loaded: false,
+			serverTimeLoaded: false,
 			isReloadRequired: false,
 			isEnabled: false,
 			isRefreshing: false,
@@ -72,11 +73,25 @@ module.exports = React.createClass({
 	},
 	initEpoch: function(){
 
-		//clear previous background timer
-		this.clearInterval(timer);
-
 		var _this = this;
-		this.setState({ isReloadRequired: false, loaded: false, isEnabled: false, isRefreshing: true, interactionDisabled: true });
+
+		//clear previous background timer and timeout
+		this.clearInterval(timer);
+		this.clearTimeout(timeout);
+
+		timeout = this.setTimeout(function(){
+			if(_this.isMounted()){
+				if(_this.state.serverTimeLoaded===false){
+					_this.setState({
+						isRefreshing: false,
+						isEnabled: true,
+						isReloadRequired: true
+					})
+				}
+			}
+		}, 5000);
+
+		this.setState({ serverTimeLoaded: false, isReloadRequired: false, loaded: false, isEnabled: false, isRefreshing: true, interactionDisabled: true });
 
 		Parse.Cloud.run('giveNextMeetingSlot', {})
 		.then(
@@ -98,6 +113,7 @@ module.exports = React.createClass({
 
 				//inject
 				_this.setState({
+					serverTimeLoaded: true,
 					serverTime: _serverTime,
 					selectedDate: _serverTime,
 					selectedInTime: _selectedInTime,
@@ -151,7 +167,6 @@ module.exports = React.createClass({
 		
 		this.clearTimeout(timeout);
 		var _this = this;
-		this.API();
 
 		//check if data is loaded
 		timeout = this.setTimeout(function(){
@@ -165,6 +180,7 @@ module.exports = React.createClass({
 				}
 			}
 		}, 10000);
+		this.API();
 	},
 	API: function(){
 
@@ -305,7 +321,7 @@ module.exports = React.createClass({
 	},
 	renderLoadingView: function(){
 		if(this.state.isReloadRequired){
-			return <ReloadView loadData={this.loadData} />
+			return <ReloadView loadData={this.initEpoch} />
 		}		
 		return <LoadingView />
 	},
