@@ -37,6 +37,9 @@ var Room = require('../components/room');
 const {height, width} = Dimensions.get('window');
 var timeout, timer, current;
 
+//local timezone
+const LOCAL_TIMEZONE = "Asia/Kolkata";
+
 module.exports = React.createClass({
 
 	mixins: [TimerMixin],
@@ -60,7 +63,7 @@ module.exports = React.createClass({
 		}
 	},
 	componentWillMount: function(){
-		this.initEpoch();
+		this.initEpoch(LOCAL_TIMEZONE);
 	},
 	componentDidMount: function(){
 		AppState.addEventListener('change', this._handleAppStateChange);
@@ -68,10 +71,10 @@ module.exports = React.createClass({
 	_handleAppStateChange: function(currentAppState) {
   		this.setState({ currentAppState: currentAppState });
   		if(this.state.currentAppState === "active"){
-  			this.initEpoch();
+  			this.initEpoch(LOCAL_TIMEZONE);
   		}
 	},
-	initEpoch: function(){
+	initEpoch: function(timezone){
 
 		var _this = this;
 
@@ -100,7 +103,8 @@ module.exports = React.createClass({
 
 				//get server time
 				//var _serverTime = MomentTZ(MomentTZ.tz(new Date("Mon Apr 18 2016 22:59:40 GMT+0530 (IST)"), "Asia/Kolkata")); 
-				var _serverTime = MomentTZ(MomentTZ.tz(new Date(result), "Asia/Kolkata")); 
+				var _serverTime = MomentTZ(MomentTZ.tz(new Date(result), timezone)); 
+				MomentTZ.tz.setDefault(timezone);
 
 				//round in-time to next slot
 				var _selectedInTime = MomentTZ(_serverTime);
@@ -135,7 +139,7 @@ module.exports = React.createClass({
 					_minutes = _this.state.serverTime.minutes();
 
 					//if server time exceeds 30 minutes or hour changes
-					if(( _minutes === 0 || _minutes === 30) && (_this.state.serverTime.seconds() === 0)){
+					if(( _minutes === 15 || _minutes === 45) && (_this.state.serverTime.seconds() === 0)){
 
 						//round and set in time
 						_inTime = MomentTZ(_this.state.serverTime);
@@ -535,10 +539,16 @@ module.exports = React.createClass({
 });
 
 function roundInTime(time){
-	if(time.minutes()>0 && time.minutes()<30){
+	if(time.minutes()<15){
+		time.minutes(0);
+	}
+	else if(time.minutes()>=15 && time.minutes()<=30){
 		time.minutes(30);
 	}
-	else{
+	else if(time.minutes()>30 && time.minutes()<45){
+		time.minutes(30);
+	}
+	else if(time.minutes()>=45){
 		time.minutes(0).add(1, "hours");
 	}
 	return time;
