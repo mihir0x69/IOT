@@ -169,10 +169,13 @@ module.exports = React.createClass({
 	},	
 	loadData: function(){
 		
-		this.clearTimeout(timeout);
 		var _this = this;
 
+		//call API
+		this.API();
+
 		//check if data is loaded
+		this.clearTimeout(timeout);
 		timeout = this.setTimeout(function(){
 			if(_this.isMounted()){
 				if(_this.state.loaded===false){
@@ -184,7 +187,6 @@ module.exports = React.createClass({
 				}
 			}
 		}, 10000);
-		this.API();
 	},
 	API: function(){
 
@@ -367,8 +369,8 @@ module.exports = React.createClass({
 				<View style={styles.sidebarBody}>
 					<TouchableHighlight style={{backgroundColor: '#f5f5f5'}} underlayColor={'#f5f5f5'}>
 						<View style={styles.sidebarItem}>
-							<Icon name="home" size={24} color="#000000" />
-							<Text style={styles.sidebarItemtext}>Dashboard</Text>
+							<Icon name="home" size={24} color="#E91E63" />
+							<Text style={[styles.sidebarItemtext, {color: '#E91E63'}]}>Dashboard</Text>
 						</View>
 					</TouchableHighlight>				
 					<TouchableHighlight underlayColor={'#f5f5f5'} onPress={this.onPressReservationList}>

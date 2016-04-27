@@ -10,6 +10,10 @@ var {
 } =  React;
 
 module.exports = React.createClass({
+	
+	componentDidMount: function(){
+		this.props.data.loadData();
+	},
 	render: function(){
 		return(
 			<View style={styles.container}>
@@ -24,7 +28,6 @@ module.exports = React.createClass({
 		);
 	},
 	onDismiss: function(){
-		this.props.data.loadData();
 		this.props.navigator.pop();
 	}
 })

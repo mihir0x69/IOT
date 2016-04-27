@@ -12,6 +12,11 @@ var {
 var Icon = require('react-native-vector-icons/MaterialIcons');
 
 module.exports = React.createClass({
+
+	componentDidMount: function(){
+		this.props.data.loadData();
+		this.props.data.refreshList("API");		
+	},
 	render: function(){
 		return(
 			<View style={styles.container}>
@@ -25,8 +30,6 @@ module.exports = React.createClass({
 		);
 	},
 	onDismiss: function(){
-		this.props.data.loadData();
-		this.props.data.refreshList("API");
 		this.props.navigator.pop();
 	}
 });
