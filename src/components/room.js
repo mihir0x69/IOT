@@ -2,7 +2,7 @@
 var React = require('react-native');
 
 var {
-	TouchableHighlight,
+	TouchableWithoutFeedback,
 	StyleSheet,
 	View,
 	Text
@@ -12,12 +12,12 @@ module.exports = React.createClass({
 
 	render: function(){
 		return(
-			<TouchableHighlight style={styles.wrapper} underlayColor={'#939393'} onPress={this.onPressRoom}>
-				<View style={styles.container}>
+			<TouchableWithoutFeedback onPress={this.onPressRoom}>
+				<View style={[styles.container, styles.wrapper]}>
 					<Text style={styles.title}>{this.props.data.room_name}</Text>
 					<Text style={styles.location}>{this.props.data.room_location == 'GP' ? 'Global Port' : this.props.data.room_location}</Text>
 				</View>
-			</TouchableHighlight>
+			</TouchableWithoutFeedback>
 		);
 	},
 	onPressRoom: function(){
