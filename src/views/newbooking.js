@@ -163,8 +163,6 @@ module.exports = React.createClass({
 			status_id: _statusId
 		}).then(
 			async function(result){
-
-				var array;
 				await AsyncStorage.removeItem('FORCE_UPDATE');
 				await AsyncStorage.setItem('FORCE_UPDATE', JSON.stringify(true));
 					

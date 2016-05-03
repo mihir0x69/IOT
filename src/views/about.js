@@ -17,7 +17,7 @@ module.exports = React.createClass({
 			aboutImage: {}
 		}
 	},
-	componentWillMount: function(){
+	componentDidMount: function(){
 		InteractionManager.runAfterInteractions(() =>{
 			this.setState({
 				aboutImage: require('../../assets/images/about.png')

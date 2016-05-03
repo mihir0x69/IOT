@@ -15,5 +15,8 @@
     "react-native-dismiss-keyboard": "0.0.3",
     "react-native-vector-icons": "^1.3.4",
     "react-timer-mixin": "^0.13.3"
+  },
+  "devDependencies": {
+    "jest-cli": "^12.0.2"
   }
 }

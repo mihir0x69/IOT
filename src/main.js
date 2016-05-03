@@ -50,13 +50,16 @@ module.exports = React.createClass({
 			initialRouteName: ''
 		}
 	},
-	componentWillMount: function(){
+	componentWillMount: async function(){
 		//IOT
 		//Parse.initialize("NOkpPBJHqjpS4QJ2TmUdFf3H9GWLKdP1Bekw2XSU", "cWS2x0pOaBsSFX76JdPYBRw4nDjxOeHhmz05ecXh", "YYyRErjI4Boku76k5RPxRR0IEh3HekLWBkzX5sz7");
 		//123456789
 		Parse.initialize("NR9dHycpjgUn0Bcem3lH1q0jniHSiynGh5yKe4Ws", "Z1CBwM16Uaa5D6imGgSFmoKmCdwC76p0V2HMa7ab", "oPTU82hoGomzVFRe1E8r9ZTgB3Q6D2UeYaI9MQmQ");
 
 		this.getInitialRoute().done();
+		await AsyncStorage.removeItem('FORCE_UPDATE');
+		await AsyncStorage.setItem('FORCE_UPDATE', JSON.stringify(true));
+
 	},
 	getInitialRoute: async function(){
 		var value;
