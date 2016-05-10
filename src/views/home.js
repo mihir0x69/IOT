@@ -103,8 +103,9 @@ module.exports = React.createClass({
 
 				//get server time
 				//var _serverTime = MomentTZ(MomentTZ.tz(new Date("Mon Apr 18 2016 22:59:40 GMT+0530 (IST)"), "Asia/Kolkata")); 
-				var _serverTime = MomentTZ(MomentTZ.tz(new Date(result), timezone)); 
-				MomentTZ.tz.setDefault(timezone);
+				//var _serverTime = MomentTZ(MomentTZ.tz(new Date(result), timezone)); 
+				var _serverTime = MomentTZ(new Date(result)); 
+				// /MomentTZ.tz.setDefault(timezone);
 
 				//round in-time to next slot
 				var _selectedInTime = MomentTZ(_serverTime);
